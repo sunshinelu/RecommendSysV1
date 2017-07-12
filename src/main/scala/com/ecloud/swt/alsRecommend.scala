@@ -89,7 +89,7 @@ object alsRecommend {
         val title_1 = Bytes.toString(x._2)
         val manuallabel_1 = Bytes.toString(x._3)
         //时间格式转化
-        val time = Bytes.toString(x._4).toLong
+        val time = Bytes.toLong(x._4)//toString(x._4).toLong
         ylzxSchema(urlID_1, title_1, manuallabel_1, time)
       }
       }.filter(x => {

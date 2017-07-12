@@ -542,3 +542,11 @@ com.ecloud.Inglory.appRecom.appRecomV1 步骤：
      --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
      /root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
      yilan-total_webpage t_hbaseSink
+
+
+时间：2017年07月12日
+
+     count 't_hbaseSink'
+     => 415751
+     => 415797
+     

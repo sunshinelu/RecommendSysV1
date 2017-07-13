@@ -162,8 +162,9 @@ object RatingSysV4 {
       filter(_.PARAMS.toString.length >= 10).
       map(x => {
         val userID = x.CREATE_BY_ID.toString
-        val reg2 = """id=(\w+\.){2}\w+.*,""".r
-        val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=", "").replace(",)", "")
+//        val reg2 = """id=(\w+\.){2}\w+.*,""".r
+        val reg2 = """id=\S*,|id=\S*}""".r
+        val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=", "").replace(",)", "").replace("})", "")
         val time = x.CREATE_TIME
         val value = 1.0
         val rating = x.REQUEST_URI match {

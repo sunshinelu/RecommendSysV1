@@ -1,14 +1,12 @@
 package com.ecloud.Inglory.RecommendSys
 
 import java.text.SimpleDateFormat
-import java.util.{Properties, Calendar, Date}
-
-
+import java.util.{Date, Properties}
 
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.{Result, Scan}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.hbase.mapreduce.{TableOutputFormat, TableInputFormat}
+import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
 import org.apache.hadoop.hbase.util.{Base64, Bytes}
 import org.apache.hadoop.mapreduce.Job
@@ -177,8 +175,9 @@ object hotLabelsV4 {
       filter(_.PARAMS.toString.length >= 10).
       map(x => {
         val userID = x.CREATE_BY_ID.toString
-        val reg2 = """id=(\w+\.){2}\w+.*,""".r
-        val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=", "").replace(",)", "")
+//        val reg2 = """id=(\w+\.){2}\w+.*,""".r
+        val reg2 = """id=\S*,|id=\S*}""".r
+        val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=", "").replace(",)", "").replace("})", "")
         Schema1(userID, urlString)
       }).filter(_.id.length >= 10)
 

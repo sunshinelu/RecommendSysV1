@@ -549,4 +549,14 @@ com.ecloud.Inglory.appRecom.appRecomV1 步骤：
      count 't_hbaseSink'
      => 415751
      => 415797
-     
+
+时间：2017年07月13日
+
+com.ecloud.Inglory.RecommendSys.hotLabelsV4
+由于rowkey的规则发生变化，提取rowkey的正则也要反正变化
+第178行：
+//  val reg2 = """id=(\w+\.){2}\w+.*,""".r
+//  val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=", "").replace(",)", "")
+改为：
+val reg2 = """id=\S*,|id=\S*}""".r
+val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=", "").replace(",)", "").replace("})", "")

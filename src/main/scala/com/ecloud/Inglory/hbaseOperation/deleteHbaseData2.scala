@@ -4,12 +4,10 @@ package com.ecloud.Inglory.hbaseOperation
 import java.util
 
 import org.apache.hadoop.hbase.HBaseConfiguration
-import org.apache.hadoop.hbase.client.{Scan, Delete, HConnectionManager, HTable}
+import org.apache.hadoop.hbase.client.{Delete, HConnectionManager, HTable, Scan}
 import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
 import org.apache.hadoop.hbase.util.{Base64, Bytes}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.sql.SparkSession
 
 /**

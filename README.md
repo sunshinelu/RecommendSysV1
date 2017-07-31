@@ -560,3 +560,23 @@ com.ecloud.Inglory.RecommendSys.hotLabelsV4
 改为：
 val reg2 = """id=\S*,|id=\S*}""".r
 val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=", "").replace(",)", "").replace("})", "")
+
+
+时间：2017年07月14日
+
+        count 'ylzx_xgwz'
+        => 198117
+        
+时间：2017年07月21日
+        
+        count 't_hbaseSink'
+        => 478922
+
+        
+时间：2017年07年25日
+
+        count 'ylzx_xgwz'
+        => 198544
+        
+        count 'ylzx_xgwz'
+        => 198569

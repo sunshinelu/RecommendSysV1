@@ -58,7 +58,7 @@ object hotLabelsV4 {
     ).flatMap(x => {
       val y = x._3
       for (w <- y) yield (x._1,x._2, w)
-    }).map(x=>(x._3, 1)).reduceByKey(_ + _).sortBy(_._2, false).take(20)
+    }).map(x=>(x._3, 1)).reduceByKey(_ + _).sortBy(_._2, false).take(35)
 
     val rdd3 = rdd2.map(_._1).mkString(";")
 

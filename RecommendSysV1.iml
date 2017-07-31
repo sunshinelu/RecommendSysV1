@@ -356,5 +356,6 @@
     <orderEntry type="library" name="Maven: net.sf.json-lib:json-lib:2.3" level="project" />
     <orderEntry type="library" name="Maven: commons-beanutils:commons-beanutils:1.8.0" level="project" />
     <orderEntry type="library" name="Maven: net.sf.ezmorph:ezmorph:1.0.6" level="project" />
+    <orderEntry type="library" name="Maven: com.huaban:jieba-analysis:1.0.2" level="project" />
   </component>
 </module>

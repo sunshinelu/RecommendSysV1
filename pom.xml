@@ -208,12 +208,12 @@
             <version>${spark.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.7.1</version>
         </dependency>
+
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -413,7 +413,12 @@
             <artifactId>json-lib</artifactId>
             <version>2.3</version>
         </dependency>
-
+        <!-- jieba分词-->
+        <dependency>
+            <groupId>com.huaban</groupId>
+            <artifactId>jieba-analysis</artifactId>
+            <version>1.0.2</version>
+        </dependency>
 
 
     </dependencies>

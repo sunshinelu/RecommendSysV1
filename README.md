@@ -580,3 +580,8 @@ val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=",
         
         count 'ylzx_xgwz'
         => 198569
+        
+ 时间：2017年08月01日   
+     
+        count 't_hbaseSink'
+        => 609482

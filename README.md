@@ -585,3 +585,38 @@ val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=",
      
         count 't_hbaseSink'
         => 609482
+        
+时间：2017年08月03日
+
+RatingSysV5：采用基于物品的相似性的方法进行推荐
+
+    spark-submit --class com.ecloud.Inglory.RatingSys.RatingSysV5 \
+    --master yarn \
+    --num-executors 8 \
+    --executor-cores 8 \
+    --executor-memory 4g \
+    --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar,/root/lulu/Program/jarLibs/spark-streaming-kafka_2.11-1.6.3.jar,/root/lulu/Program/jarLibs/spark-streaming-flume_2.11-2.1.0.jar,/root/lulu/Program/jarLibs/kafka_2.11-0.10.0.1.jar,/root/lulu/Program/jarLibs/zkclient-0.8.jar,/root/lulu/Program/jarLibs/metrics-core-2.2.0.jar,/root/lulu/Program/jarLibs/metrics-annotation-2.2.0.jar,/root/lulu/Program/jarLibs/kafka-clients-0.10.0.1.jar \
+    /root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
+    yilan-total_webpage t_hbaseSink  ylzx_cnxh
+   
+    
+    vi ylzx_cnxh.sh 
+    
+#!/bin/bash
+#name=$1
+
+set -x
+source /root/.bashrc
+#scp -r 192.168.37.103:/usr/soft/ylzx/logs/log_* /root/lulu/Workspace/spark/yeeso/RecommendSys/logs/
+#hadoop fs -rmr /personal/sunlu/ylzx_app/*
+#hadoop fs -put /root/lulu/Workspace/spark/yeeso/RecommendSys/logs/log_* /personal/sunlu/ylzx_app/
+cd /root/software/spark-2.0.2/bin
+
+spark-submit --class com.ecloud.Inglory.RatingSys.RatingSysV5 \
+--master yarn \
+--num-executors 8 \
+--executor-cores 8 \
+--executor-memory 4g \
+--jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar,/root/lulu/Program/jarLibs/spark-streaming-kafka_2.11-1.6.3.jar,/root/lulu/Program/jarLibs/spark-streaming-flume_2.11-2.1.0.jar,/root/lulu/Program/jarLibs/kafka_2.11-0.10.0.1.jar,/root/lulu/Program/jarLibs/zkclient-0.8.jar,/root/lulu/Program/jarLibs/metrics-core-2.2.0.jar,/root/lulu/Program/jarLibs/metrics-annotation-2.2.0.jar,/root/lulu/Program/jarLibs/kafka-clients-0.10.0.1.jar \
+/root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
+yilan-total_webpage t_hbaseSink  ylzx_cnxh

@@ -620,3 +620,48 @@ spark-submit --class com.ecloud.Inglory.RatingSys.RatingSysV5 \
 --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar,/root/lulu/Program/jarLibs/spark-streaming-kafka_2.11-1.6.3.jar,/root/lulu/Program/jarLibs/spark-streaming-flume_2.11-2.1.0.jar,/root/lulu/Program/jarLibs/kafka_2.11-0.10.0.1.jar,/root/lulu/Program/jarLibs/zkclient-0.8.jar,/root/lulu/Program/jarLibs/metrics-core-2.2.0.jar,/root/lulu/Program/jarLibs/metrics-annotation-2.2.0.jar,/root/lulu/Program/jarLibs/kafka-clients-0.10.0.1.jar \
 /root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
 yilan-total_webpage t_hbaseSink  ylzx_cnxh
+
+
+
+
+
+        
+时间：2017年08月13日
+
+修改文章相似性计算代码：
+
+     spark-submit \
+     --class com.ecloud.Inglory.word2Vec.docSimilarityV2 \
+     --master yarn --num-executors 4 \
+     --executor-cores 4 \
+     --executor-memory 4g \
+     --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar /root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
+     yilan-total_webpage t_userProfileV1 
+ 
+任务运行时间在2小时以上，且任务出错。     
+
+     spark-submit \
+     --class com.ecloud.Inglory.word2Vec.docSimilarityV2 \
+     --master yarn --num-executors 6 \
+     --executor-cores 6 \
+     --executor-memory 6g \
+     --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar /root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
+     yilan-total_webpage t_userProfileV1 
+     
+
+查看HBASE表中数据
+     
+     count 't_userProfileV1'
+     count 'ylzx_xgwz'
+     
+生成word2Vec Model
+
+     spark-submit \
+     --class com.ecloud.Inglory.word2Vec.BuildWord2VecModel \
+     --master yarn \
+     --num-executors 2 \
+     --executor-cores 2 \
+     --executor-memory 2g \
+     --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
+     /root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
+     yilan-total_webpage

@@ -164,6 +164,8 @@ object docSimilarityV2 {
       .setMinCount(0)
     val model = word2Vec.fit(ds1)
 
+//    model.write.overwrite().save("personal/sunlu/lulu/yeeso/Word2VecModelDF")
+
     val word2VecDF = model.transform(ds1)
 
     val document = word2VecDF.select("id", "features").na.drop.rdd.map {

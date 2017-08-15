@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/RecommendSysV1</output-path>
     <root id="archive" name="RecommendSysV1.jar">
       <element id="module-output" name="RecommendSysV1" />
+      <element id="dir-copy" path="$PROJECT_DIR$/library" />
     </root>
   </artifact>
 </component>

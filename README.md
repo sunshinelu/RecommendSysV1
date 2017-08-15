@@ -665,3 +665,19 @@ yilan-total_webpage t_hbaseSink  ylzx_cnxh
      --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
      /root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
      yilan-total_webpage
+
+
+        
+时间：2017年08月15日
+
+使用ml.feature.Word2Vec方法构建Word2Vec Model，并将模型保存到HDFS中
+
+     spark-submit \
+     --class com.ecloud.Inglory.word2Vec.BuildWord2VecModelDF \
+     --master yarn \
+     --num-executors 4 \
+     --executor-cores 4 \
+     --executor-memory 2g \
+     --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
+     /root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
+     yilan-total_webpage

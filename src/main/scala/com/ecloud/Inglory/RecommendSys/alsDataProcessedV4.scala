@@ -3,19 +3,18 @@ package com.ecloud.Inglory.RecommendSys
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.ecloud.Inglory.Test.readLogs.{Schema2, Schema1, LogView}
-import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, HBaseConfiguration}
 import org.apache.hadoop.hbase.client.{HBaseAdmin, Put, Result, Scan}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.hbase.mapreduce.{TableOutputFormat, TableInputFormat}
+import org.apache.hadoop.hbase.mapreduce.{TableInputFormat, TableOutputFormat}
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
-import org.apache.hadoop.hbase.util.{Bytes, Base64}
+import org.apache.hadoop.hbase.util.{Base64, Bytes}
+import org.apache.hadoop.hbase.{HBaseConfiguration, HColumnDescriptor, HTableDescriptor}
 import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.ml.feature.StringIndexer
-import org.apache.spark.mllib.recommendation.{MatrixFactorizationModel, ALS, Rating}
+import org.apache.spark.mllib.recommendation.{ALS, MatrixFactorizationModel, Rating}
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Row, SparkSession}
 
 /**
  * Created by sunlu on 17/3/30.

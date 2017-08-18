@@ -681,3 +681,18 @@ yilan-total_webpage t_hbaseSink  ylzx_cnxh
      --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
      /root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
      yilan-total_webpage
+     
+         
+时间：2017年08月18日
+    
+     [root@slave4 shScript]# nohup ./ylzx_logsToHbase.sh &
+     [1] 6872
+     
+     application_1503041014194_0001	
+     
+     
+     count 't_hbaseSink'
+     => 987491
+     
+     count 't_hbaseSink'
+     => 987596

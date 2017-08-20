@@ -22,6 +22,7 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StringType, StructField}
 import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.storage.StorageLevel
 
 /**
  * Created by sunlu on 17/5/20.
@@ -189,9 +190,9 @@ object docSimilarity {
     val exact = transposed_matrix.toRowMatrix.columnSimilarities()
 
     val sim_threshhold = sim.entries.filter { case MatrixEntry(i, j, u) => u >= threshhold && u <= upper }
+    sim_threshhold.persist(StorageLevel.MEMORY_AND_DISK)
 
-
-    val docSimsRDD = sim_threshhold.map { x => {
+    val docSimsRDD1 = sim_threshhold.map { x => {
       val doc1 = x.i.toString
       val doc2 = x.j.toString
       val sims = x.value.toDouble
@@ -200,6 +201,19 @@ object docSimilarity {
       docSimsSchema(doc1, doc2, sims2)
     }
     }
+
+    val docSimsRDD2 = sim_threshhold.map { x => {
+      val doc2 = x.i.toString
+      val doc1 = x.j.toString
+      val sims = x.value.toDouble
+      //保留sims中有效数字
+      val sims2 = f"$sims%1.5f".toDouble
+      docSimsSchema(doc1, doc2, sims2)
+    }
+    }
+    sim_threshhold.unpersist()
+
+    val docSimsRDD = docSimsRDD1.union(docSimsRDD2)
 
     val ds4 = spark.createDataset(docSimsRDD)
 

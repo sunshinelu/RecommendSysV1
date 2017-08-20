@@ -259,7 +259,8 @@ object RatingSysV5 {
                          ) extends Serializable
 
 
-    val itemSimiRdd = itemSimi.entries.map(f => ItemSimi(f.i, f.j, f.value))
+    val itemSimiRdd = itemSimi.entries.map(f => ItemSimi(f.i, f.j, f.value)).
+                union(itemSimi.entries.map(f => ItemSimi(f.j, f.i, f.value)))
 
     val rdd_app_R1 = itemSimiRdd.map { f => (f.itemid1, f.itemid2, f.similar) }
     val user_prefer1 = rdd1.map { f => (f.i, f.j, f.value) }

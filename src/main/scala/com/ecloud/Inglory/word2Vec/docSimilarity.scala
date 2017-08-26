@@ -72,7 +72,7 @@ object docSimilarity {
     val todayL = dateFormat.parse(today).getTime
     //获取N天的时间，并把时间转换成long类型
     val cal: Calendar = Calendar.getInstance()
-    val N = 3
+    val N = 2
 //      cal.add(Calendar.DATE, -N)//获取N天前或N天后的时间，-2为2天前
     cal.add(Calendar.YEAR, -N) //获取N年或N年后的时间，-2为2年前
     //    cal.add(Calendar.MONTH, -N) //获取N月或N月后的时间，-2为2月前
@@ -161,7 +161,7 @@ object docSimilarity {
     val ds1 = spark.createDataset(hbaseRDD).dropDuplicates("segWords")
 //    val userID = new StringIndexer().setInputCol("urlID").setOutputCol("id").fit(ds1)
 //    val ds2 = userID.transform(ds1)
-    val vocabSize: Int = 10000//2900000
+    val vocabSize: Int = 1000//2900000
 
     val cvModel: CountVectorizerModel = new CountVectorizer()
       .setInputCol("segWords")

@@ -27,7 +27,7 @@ import org.apache.spark.storage.StorageLevel
 /**
  * Created by sunlu on 17/5/20.
  * 由于计算文章相似性的代码运行时间较长（超过4小时），现修改计算文章相似性计算策略。
- * 获取近5年的数据进行分析
+ * 获取近半年的数据进行分析
  * 使用word2vec构建特征矩阵
  * 然后使用RDD的分布式矩阵计算相似性
  * 运行成功！

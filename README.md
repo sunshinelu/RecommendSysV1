@@ -696,3 +696,14 @@ yilan-total_webpage t_hbaseSink  ylzx_cnxh
      
      count 't_hbaseSink'
      => 987596
+
+时间：2017年08月27日
+
+     count 'ylzx_xgwz'
+     => 415207
+
+    count 'yilan-total_webpage'
+     => 145611
+
+     count 't_hbaseSink'
+     => 1048736

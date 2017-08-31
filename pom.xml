@@ -157,14 +157,14 @@
             <version>${hbase.version}</version>
         </dependency>
 
-        <!-- hbase-spark -->
-        <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-spark</artifactId>
-            <version>1.2.0-cdh5.10.0</version>
-            <scope>system</scope>
-            <systemPath>/Users/sunlu/.m2/repository/org/apache/hbase/hbase-spark/1.2.0-cdh5.10.0/hbase-spark-1.2.0-cdh5.10.0.jar</systemPath>
-        </dependency>
+        <!--&lt;!&ndash; hbase-spark &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.hbase</groupId>-->
+            <!--<artifactId>hbase-spark</artifactId>-->
+            <!--<version>1.2.0-cdh5.10.0</version>-->
+            <!--<scope>system</scope>-->
+            <!--<systemPath>/Users/sunlu/.m2/repository/org/apache/hbase/hbase-spark/1.2.0-cdh5.10.0/hbase-spark-1.2.0-cdh5.10.0.jar</systemPath>-->
+        <!--</dependency>-->
 
         <!-- SPARK -->
         <dependency>

@@ -316,12 +316,20 @@
             <version>3.0.0-alpha</version>
         </dependency>
 
-        <!-- solr-solrj -->
+        <!--&lt;!&ndash; solr-solrj &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.solr</groupId>-->
+            <!--<artifactId>solr-solrj</artifactId>-->
+            <!--<version>6.1.0</version>-->
+        <!--</dependency>-->
+
+        <!-- solr start -->
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
-            <version>6.1.0</version>
+            <version>5.1.0</version>
         </dependency>
+        <!-- solr end -->
 
         <!-- https://mvnrepository.com/artifact/org.elasticsearch/elasticsearch-hadoop -->
         <!-- 使用该包时spark中的fit函数不可用 -->

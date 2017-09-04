@@ -726,3 +726,30 @@ yilan-total_webpage t_hbaseSink  ylzx_cnxh
 
       count 'ylzx_xgwz'
       => 460312
+      
+时间：2017年09月04日
+
+08:46
+
+      count 'ylzx_xgwz'
+      => 483539
+      
+      count 't_hbaseSink'
+      => 1116495
+  
+任务莫名被清空，重新提交ylzx_logsToHbase任务。
+
+[root@slave4 shScript]# nohup ./ylzx_logsToHbase.sh &
+[1] 15768
+[root@slave4 shScript]# nohup: ignoring input and appending output to `nohup.out'
+
+application_1504508652498_0001
+
+count 't_hbaseSink'
+=> 1120028
+
+count 't_hbaseSink'
+=> 1120094
+
+count 't_hbaseSink'
+=> 1120340

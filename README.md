@@ -754,3 +754,7 @@ count 't_hbaseSink'
 count 't_hbaseSink'
 => 1120340
 
+时间：2017年09月05日
+
+    count 'ylzx_xgwz'
+    => 494187

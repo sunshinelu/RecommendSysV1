@@ -23,14 +23,14 @@ import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
- * Created by sunlu on 17/9/6.
- * 使用基于内容的推荐，构建推荐模型：
- *** 使用tf-idf生成文章向量，余弦计算文章相似性
- *** 然后使用item-based方法完成推荐
- * 测试
- * spark-shell --master yarn --num-executors 4 --executor-cores  2 --executor-memory 4g --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar
- *
- */
+  * Created by sunlu on 17/9/6.
+  * 使用基于内容的推荐，构建推荐模型：
+  * ** 使用tf-idf生成文章向量，余弦计算文章相似性
+  * ** 然后使用item-based方法完成推荐
+  * 测试
+  * spark-shell --master yarn --num-executors 4 --executor-cores  2 --executor-memory 4g --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar
+  *
+  */
 object ContentRecomm {
 
   def convertScanToString(scan: Scan) = {
@@ -45,11 +45,13 @@ object ContentRecomm {
     Logger.getRootLogger().setLevel(Level.OFF)
   }
 
-  case class ylzxSchema(itemString: String, title: String, segWords:Seq[String], manuallabel: String, time: Long)
-  case class docSimsSchema(doc1: Long, doc2: Long, sims: Double)
-  case class logsSchema(operatorId: String, userString: String, itemString: String, accessTime: String, accessTimeL: Long, value:Double)
+  case class ylzxSchema(itemString: String, title: String, segWords: Seq[String], manuallabel: String, time: Long)
 
-  def getYlzxRDD(ylzxTable: String, year: Int,sc: SparkContext): RDD[ylzxSchema] = {
+  case class docSimsSchema(doc1: Long, doc2: Long, sims: Double)
+
+  case class logsSchema(operatorId: String, userString: String, itemString: String, accessTime: String, accessTimeL: Long, value: Double)
+
+  def getYlzxRDD(ylzxTable: String, year: Int, sc: SparkContext): RDD[ylzxSchema] = {
 
     //load stopwords file
     val stopwordsFile = "/personal/sunlu/lulu/yeeso/Stopwords.dic"
@@ -59,7 +61,7 @@ object ContentRecomm {
     // 获取时间
     //定义时间格式
     // val dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy hh:mm:ss z", Locale.ENGLISH)
-    val dateFormat = new SimpleDateFormat("yyyy-MM-dd")// yyyy-MM-dd HH:mm:ss或者 yyyy-MM-dd
+    val dateFormat = new SimpleDateFormat("yyyy-MM-dd") // yyyy-MM-dd HH:mm:ss或者 yyyy-MM-dd
 
     //获取当前时间
     val now: Date = new Date()
@@ -100,7 +102,7 @@ object ContentRecomm {
       val content = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("c")) // 内容列
       val manuallabel = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("manuallabel")) //标签列
       val time = v.getValue(Bytes.toBytes("f"), Bytes.toBytes("mod")) //时间列
-      (urlID, title, content,manuallabel, time)
+      (urlID, title, content, manuallabel, time)
     }
     }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5).
       map { x => {
@@ -142,7 +144,8 @@ object ContentRecomm {
      */
     val dateFormat2 = new SimpleDateFormat("yyyy-MM-dd") // yyyy-MM-dd HH:mm:ss或者 yyyy-MM-dd
     val rdd1 = df1.rdd.map { case Row(r1: String, r2: String, r3: String, r4) =>
-        logsSchema(r1, r2, r3, r4.toString, dateFormat2.parse(r4.toString).getTime, 1.0) }
+      logsSchema(r1, r2, r3, r4.toString, dateFormat2.parse(r4.toString).getTime, 1.0)
+    }
 
     val rdd2 = rdd1.map(x => {
 
@@ -157,8 +160,8 @@ object ContentRecomm {
         case _ => 0.0
       }
 
-      logsSchema(x.operatorId, x.userString, x.itemString, x.accessTime,x.accessTimeL,rating)
-    })//.filter(_.value >= 0.4)
+      logsSchema(x.operatorId, x.userString, x.itemString, x.accessTime, x.accessTimeL, rating)
+    }) //.filter(_.value >= 0.4)
 
     rdd2
   }
@@ -193,18 +196,19 @@ object ContentRecomm {
 
     val logsRDD = getLogsRDD(logsTable, spark, sc)
     val logsDS = spark.createDataset(logsRDD).na.drop(Array("userString")).filter($"operatorId" === "7a4e4f92-7357-4057-8b39-7f5f96f341c2")
-    val logsDS2 = logsDS.groupBy("operatorId","userString", "itemString").agg(sum("value")).withColumnRenamed("sum(value)", "rating")
+    val logsDS2 = logsDS.groupBy("operatorId", "userString", "itemString").agg(sum("value")).withColumnRenamed("sum(value)", "rating")
     logsDS2.persist(StorageLevel.MEMORY_AND_DISK_SER)
-/*
-3. content based document similarity calculation
- */
+
+    /*
+    3. content based document similarity calculation
+     */
 
 
     //string to number
     val itemId = new StringIndexer().setInputCol("itemString").setOutputCol("itemID").fit(ylzxDS)
     val itemIdDf = itemId.transform(ylzxDS)
 
-// calculate tf-idf
+    // calculate tf-idf
     val hashingTF = new HashingTF().
       setInputCol("segWords").setOutputCol("tfFeatures") //.setNumFeatures(200000)
     val tfData = hashingTF.transform(itemIdDf)
@@ -252,35 +256,131 @@ object ContentRecomm {
 
     val docSimsRDD = docSimsRDD1.union(docSimsRDD2)
     val docSimisDS = spark.createDataset(docSimsRDD)
-/*
-4. item-based recommendation
- */
-val itemLab = tfidfDF2.select("itemID","itemString")
-    val itemLab2 = tfidfDF2.select("itemString","title","manuallabel", "time")
+    /*
+    docSimisDS.count
+res5: Long = 58170
+     */
 
-    val logsDS3 = logsDS2.join(itemLab, Seq("itemString"), "left").na.drop().withColumnRenamed("itemID","doc1")
+    /*
+    4. item-based recommendation
+     */
+//    logsDS.count//64
+//    logsDS2.count//60
+    val itemLab = tfidfDF2.select("itemID", "itemString")
+    val itemLab2 = tfidfDF2.select("itemString", "title", "manuallabel", "time")
+
+    val logsDS3 = logsDS2.join(itemLab, Seq("itemString"), "left").na.drop().withColumnRenamed("itemID", "doc1")
+//    logsDS3.count//25
+    /*
+    logsDS3.printSchema
+root
+ |-- itemString: string (nullable = true)
+ |-- operatorId: string (nullable = true)
+ |-- userString: string (nullable = true)
+ |-- rating: double (nullable = true)
+ |-- doc1: long (nullable = true)
+     */
+    logsDS3.na.drop(Array("itemString")).count // 60
+    logsDS3.na.drop(Array("operatorId")).count // 60
+    logsDS3.na.drop(Array("userString")).count // 60
+    logsDS3.na.drop(Array("rating")).count // 60
+    logsDS3.na.drop(Array("doc1")).count // 25
+
+
     val joinedDf1 = logsDS3.join(docSimisDS, Seq("doc1"), "left").na.drop().
       withColumn("score", col("rating") * col("sims")).
-      groupBy("operatorId","userString", "doc2").agg(sum("score")).withColumnRenamed("sum(score)", "rating")
+      groupBy("operatorId", "userString", "doc2").agg(sum("score")).withColumnRenamed("sum(score)", "rating")
 
-    val logsDS4  = logsDS3.withColumnRenamed("doc1", "doc2").
-      withColumn("whether",lit(1))
+//    joinedDf1.count()//332
+    /*
+     joinedDf1.printSchema
+root
+ |-- operatorId: string (nullable = true)
+ |-- userString: string (nullable = true)
+ |-- doc2: long (nullable = true)
+ |-- rating: double (nullable = true)
+     */
 
-    val joinedDf2 = logsDS4.join(joinedDf1, Seq("operatorId","userString", "doc2"), "left").filter(col("whether").isNull)
+    val logsDS4 = logsDS3.withColumnRenamed("doc1", "doc2").
+      withColumn("whether", lit(1))
+//    logsDS4.count // 25
 
+    val joinedDf2 = joinedDf1.join(logsDS4, Seq("operatorId", "userString", "doc2"), "left").filter(col("whether").isNull)
+//joinedDf2.count //  328
     val joinedDf3 = joinedDf2.join(itemLab2, Seq("itemString"), "left").drop("whether")
-
+//joinedDf3.count // 328
 
     //对dataframe进行分组排序，并取每组的前5个
     val w = Window.partitionBy("userString").orderBy(col("time").desc)
     val rankDF = joinedDf3.withColumn("rn", row_number.over(w)).where(col("rn") <= 6)
+//rankDF.count // res33: Long = 12
 
     //.select("userString", "operatorId","itemString", "title", "time", "CREATETIME","rn")
-    val columnsRenamed = Seq("USERNAME", "OPERATOR_ID", "ATICLEID" ,"TITLE", "ATICLETIME", "CREATETIME", "RATE")
+    val columnsRenamed = Seq("USERNAME", "OPERATOR_ID", "ATICLEID", "TITLE", "ATICLETIME", "CREATETIME", "RATE")
     val resultDF = rankDF.withColumn("systime", current_timestamp()).
       withColumn("systime", date_format($"systime", "yyyy-MM-dd HH:mm:ss")).
-      select("userString","operatorId","itemString","title", "time","systime", "rn").
+      select("userString", "operatorId", "itemString", "title", "time", "systime", "rn").
       toDF(columnsRenamed: _*)
+/*
+resultDF.printSchema
+root
+ |-- USERNAME: string (nullable = true)
+ |-- OPERATOR_ID: string (nullable = true)
+ |-- ATICLEID: string (nullable = true)
+ |-- TITLE: string (nullable = true)
+ |-- ATICLETIME: long (nullable = true)
+ |-- CREATETIME: string (nullable = false)
+ |-- RATE: integer (nullable = true)
+ */
+
+/*
+scala> resultDF.select("USERNAME").dropDuplicates.show
++-------------+
+|     USERNAME|
++-------------+
+|anonymousUser|
+|  admin@sdswt|
++-------------+
+
+
+scala> logsDS.select("userString").dropDuplicates().show()
++-------------+
+|   userString|
++-------------+
+|  test3@sdswt|
+|anonymousUser|
+|  admin@sdswt|
++-------------+
+
+
+scala> logsDS2.select("userString").dropDuplicates().show()
++-------------+
+|   userString|
++-------------+
+|  test3@sdswt|
+|anonymousUser|
+|  admin@sdswt|
++-------------+
+
+
+scala> logsDS3.select("userString").dropDuplicates().show()
++-------------+
+|   userString|
++-------------+
+|anonymousUser|
+|  admin@sdswt|
++-------------+
+
+scala> logsDS.filter(col("userString") === "test3@sdswt").select("itemString").collect.foreach(println)
+[3f8ed9a1-541b-4fb1-97f8-d2987935ab3a]
+[1cbff174-2194-4556-90af-a11e4656c2d4]
+
+
+
+ */
+
+    ylzxDS.filter(col("itemString") === "3f8ed9a1-541b-4fb1-97f8-d2987935ab3a").show()
+    ylzxDS.filter(col("itemString") === "1cbff174-2194-4556-90af-a11e4656c2d4").show()
 
     //将df4保存到hotWords_Test表中
     val url2 = "jdbc:mysql://192.168.37.102:3306/ylzx?useUnicode=true&characterEncoding=UTF-8"
@@ -291,7 +391,7 @@ val itemLab = tfidfDF2.select("itemID","itemString")
     //清空SPEC_LOG_RECOM表
     alsRecommend.truncateMysql("jdbc:mysql://192.168.37.102:3306/ylzx", "ylzx", "ylzx", "SPEC_LOG_RECOM")
     //将结果保存到数据框中
-    resultDF.write.mode("append").jdbc(url2, "SPEC_LOG_RECOM", prop2)//overwrite or append
+    resultDF.write.mode("append").jdbc(url2, "SPEC_LOG_RECOM", prop2) //overwrite or append
 
     sc.stop()
     spark.stop()

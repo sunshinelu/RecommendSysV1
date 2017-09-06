@@ -1,8 +1,9 @@
-# UsersimiSub测试
+# ContentRecomm测试
 
 
 spark-shell --master yarn --num-executors 4 --executor-cores  2 --executor-memory 4g --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar
 
+spark-shell --master yarn --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar
 
 
 import java.text.SimpleDateFormat
@@ -268,29 +269,35 @@ import org.apache.spark.{SparkConf, SparkContext}
 
     rdd2
   }
-  
-  
+
+
    val ylzxTable = "yilan-total_webpage"
       val logsTable = "SPEC_LOG_CLICK"
-      
+
       val ylzxRDD = getYlzxRDD(ylzxTable, 20, sc)
           val ylzxDS = spark.createDataset(ylzxRDD)
-      
+
           val logsRDD = getLogsRDD(logsTable, spark, sc)
           val logsDS = spark.createDataset(logsRDD).na.drop(Array("userString")).filter($"operatorId" === "7a4e4f92-7357-4057-8b39-7f5f96f341c2")
           val logsDS2 = logsDS.groupBy("operatorId","userString", "itemString").agg(sum("value")).withColumnRenamed("sum(value)", "rating")
           logsDS2.persist(StorageLevel.MEMORY_AND_DISK_SER)
-          
+
           val itemId = new StringIndexer().setInputCol("itemString").setOutputCol("itemID").fit(ylzxDS)
               val itemIdDf = itemId.transform(ylzxDS)
-              
-               val idf = new IDF().setInputCol("tfFeatures").setOutputCol("tfidfVec")
+
+
+    val hashingTF = new HashingTF().
+      setInputCol("segWords").setOutputCol("tfFeatures") //.setNumFeatures(200000)
+    val tfData = hashingTF.transform(itemIdDf)
+
+                   val idf = new IDF().setInputCol("tfFeatures").setOutputCol("tfidfVec")
                   val idfModel = idf.fit(tfData)
                   val tfidfDF = idfModel.transform(tfData)
-              
+
+
                   val tfidfDF2 = tfidfDF.withColumn("itemID", $"itemID".cast("long"))
                   tfidfDF2.persist(StorageLevel.MEMORY_AND_DISK_SER)
-                  
+
 val document = tfidfDF2.select("itemID", "tfidfVec").na.drop.rdd.map {
       case Row(id: Long, features: MLVector) => (id, Vectors.fromML(features))
     }.filter(_._2.size >= 2) //.distinct
@@ -306,10 +313,10 @@ val document = tfidfDF2.select("itemID", "tfidfVec").na.drop.rdd.map {
 
     val sim_threshhold = sim.entries.filter { case MatrixEntry(i, j, u) => u >= threshhold && u <= upper } //.repartition(400)
     sim_threshhold.persist(StorageLevel.MEMORY_AND_DISK)
-    
-    
-    
-    
+
+
+
+
         val docSimsRDD1 = sim_threshhold.map { x => {
           val doc1 = x.i
           val doc2 = x.j
@@ -326,7 +333,7 @@ val document = tfidfDF2.select("itemID", "tfidfVec").na.drop.rdd.map {
           docSimsSchema(doc1, doc2, sims)
         }
         }
-    
+
         val docSimsRDD = docSimsRDD1.union(docSimsRDD2)
         val docSimisDS = spark.createDataset(docSimsRDD)
     /*
@@ -334,31 +341,31 @@ val document = tfidfDF2.select("itemID", "tfidfVec").na.drop.rdd.map {
      */
     val itemLab = tfidfDF2.select("itemID","itemString")
         val itemLab2 = tfidfDF2.select("itemString","title","manuallabel", "time")
-    
+
         val logsDS3 = logsDS2.join(itemLab, Seq("itemString"), "left").na.drop().withColumnRenamed("itemID","doc1")
         val joinedDf1 = logsDS3.join(docSimisDS, Seq("doc1"), "left").na.drop().
           withColumn("score", col("rating") * col("sims")).
           groupBy("operatorId","userString", "doc2").agg(sum("score")).withColumnRenamed("sum(score)", "rating")
-    
+
         val logsDS4  = logsDS3.withColumnRenamed("doc1", "doc2").
           withColumn("whether",lit(1))
-    
+
         val joinedDf2 = logsDS4.join(joinedDf1, Seq("operatorId","userString", "doc2"), "left").filter(col("whether").isNull)
-    
+
         val joinedDf3 = joinedDf2.join(itemLab2, Seq("itemString"), "left").drop("whether")
-    
-    
+
+
         //对dataframe进行分组排序，并取每组的前5个
         val w = Window.partitionBy("userString").orderBy(col("time").desc)
         val rankDF = joinedDf3.withColumn("rn", row_number.over(w)).where(col("rn") <= 6)
-    
+
         //.select("userString", "operatorId","itemString", "title", "time", "CREATETIME","rn")
         val columnsRenamed = Seq("USERNAME", "OPERATOR_ID", "ATICLEID" ,"TITLE", "ATICLETIME", "CREATETIME", "RATE")
         val resultDF = rankDF.withColumn("systime", current_timestamp()).
           withColumn("systime", date_format($"systime", "yyyy-MM-dd HH:mm:ss")).
           select("userString","operatorId","itemString","title", "time","systime", "rn").
           toDF(columnsRenamed: _*)
-    
+
         //将df4保存到hotWords_Test表中
         val url2 = "jdbc:mysql://192.168.37.102:3306/ylzx?useUnicode=true&characterEncoding=UTF-8"
         //使用"?useUnicode=true&characterEncoding=UTF-8"以防止出现存入MySQL数据库中中文乱码情况
@@ -366,6 +373,25 @@ val document = tfidfDF2.select("itemID", "tfidfVec").na.drop.rdd.map {
         prop2.setProperty("user", "ylzx")
         prop2.setProperty("password", "ylzx")
         //清空SPEC_LOG_RECOM表
-        alsRecommend.truncateMysql("jdbc:mysql://192.168.37.102:3306/ylzx", "ylzx", "ylzx", "SPEC_LOG_RECOM")
+
+        def truncateMysql(url: String, user: String, password:String, tableName:String) : Unit ={
+            //驱动程序名
+            val driver = "com.mysql.jdbc.Driver"
+            // 加载驱动程序
+            Class.forName(driver)
+            // 连续数据库
+            val conn = DriverManager.getConnection(url, user, password)
+            if (!conn.isClosed())
+              System.out.println("Succeeded connecting to the Database!")
+            // statement用来执行SQL语句
+            val statement = conn.createStatement()
+            // 要执行的SQL语句
+            val sql = "truncate table " + tableName
+
+            val rs = statement.executeUpdate(sql)
+            println("truncate table succeeded!")
+          }
+
+ truncateMysql("jdbc:mysql://192.168.37.102:3306/ylzx", "ylzx", "ylzx", "SPEC_LOG_RECOM")
         //将结果保存到数据框中
         resultDF.write.mode("append").jdbc(url2, "SPEC_LOG_RECOM", prop2)//overwrite or append

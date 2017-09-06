@@ -1,0 +1,73 @@
+# ylzx_定时任务
+
+时间：2017年04月01日
+服务器：slave4
+事件：启动ylzx_xgwz.sh、ylzx_cnxh.sh和ylzx_hotLabel.sh定时任务
+      ylzx_xgwz.sh：5点执行
+	  ylzx_cnxh.sh：5点30分执行
+	  ylzx_hotLabels.sh：6点执行
+
+参考链接：
+http://blog.csdn.net/blank1990/article/details/50457380
+
+1.进入root账户
+sudo root
+2查看crontab服务状态
+service crond status
+
+启动服务
+service crond start
+
+3.新建定时任务
+crontab -u root -e
+
+30 5,12,15,18 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_xgwz.sh
+
+0 6,12,15,18 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_cnxh.sh
+
+30 6,13,16,19 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_hotLabels.sh
+
+由于计算文章相似性所需时间较长，定时任务后修改为：
+30 18 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_xgwz.sh
+
+0 6,12,15,18 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_cnxh.sh
+
+30 6,13,16,19 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_hotLabels.sh
+
+0 0,12 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/swt_recom.sh
+
+0 7 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_appRecom.sh
+
+
+4.重新启动服务
+service crond restart
+
+5.查看进度
+crontab -l
+
+6.停掉该任务，输入下面命令，然后删除所执行的命令
+crontab -u root -e
+
+
+
+注意：
+shell脚本中一定要添加：
+source /root/.bashrc
+
+
+#!/bin/bash
+#name=$1
+
+set -x
+source /root/.bashrc
+cd /root/software/spark-2.0.2/bin
+
+spark-submit \
+--class com.ecloud.Inglory.appRecom.appRecomV1 \
+--master yarn \
+--num-executors 2 \
+--executor-cores 2 \
+--executor-memory 2g \
+--jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
+/root/lulu/Workspace/spark/yeeso/RecommendSys/RecommendSysV1.jar \
+yilan-total_webpage t_hbaseSink

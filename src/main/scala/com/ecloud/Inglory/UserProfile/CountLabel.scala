@@ -216,12 +216,14 @@ object CountLabel {
     val sc = spark.sparkContext
     import spark.implicits._
 
+
     val ylzxTable = args(0)
     val logsTable = args(1)
-    /*
+
+/*
     val ylzxTable = "yilan-total_webpage"
     val logsTable = "t_hbaseSink"
-     */
+*/
 
     // 获取日志数据
     val logsRDD = getLogsRDD(logsTable, sc)

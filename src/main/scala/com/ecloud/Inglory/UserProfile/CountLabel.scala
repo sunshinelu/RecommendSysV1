@@ -1,9 +1,8 @@
 package com.ecloud.Inglory.UserProfile
 
 import java.text.SimpleDateFormat
-import java.util.{Properties, Calendar, Date}
+import java.util.{Calendar, Date, Properties}
 
-import com.ecloud.Inglory.appRecom.appRecomV1.{solrWordsView, LabelView, LogView3}
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
@@ -11,10 +10,10 @@ import org.apache.hadoop.hbase.protobuf.ProtobufUtil
 import org.apache.hadoop.hbase.util.{Base64, Bytes}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * Created by sunlu on 17/9/7.
@@ -134,10 +133,10 @@ object CountLabel {
         val time = x.CREATE_TIME
         val value = 1.0
         val rating = x.REQUEST_URI match {
-          case r if (r.contains("search/getContentById.do")) => 0.2 * value
-          case r if (r.contains("like/add.do")) => 0.3 * value
-          case r if (r.contains("favorite/add.do")) => 0.5 * value
-          case r if (r.contains("favorite/delete.do")) => -0.5 * value
+          case r if (r.contains("search/getContentById.do")) => 1.0 * value //0.2
+          case r if (r.contains("like/add.do")) => 1.0 * value //0.3
+          case r if (r.contains("favorite/add.do")) => 1.0 * value //0.5
+          case r if (r.contains("favorite/delete.do")) => -1.0 * value //-0.5
           case _ => 0.0 * value
         }
 
@@ -219,6 +218,10 @@ object CountLabel {
 
     val ylzxTable = args(0)
     val logsTable = args(1)
+    /*
+    val ylzxTable = "yilan-total_webpage"
+    val logsTable = "t_hbaseSink"
+     */
 
     // 获取日志数据
     val logsRDD = getLogsRDD(logsTable, sc)
@@ -236,13 +239,17 @@ object CountLabel {
     // 获取文章标签
     val manuallableDf = labelsDS.select("itemString", "manuallabel").
       withColumn("labels", explode(split($"manuallabel", ";"))).
-      withColumn("rating", lit(1.0)).drop("manuallabel")
+      withColumn("rating", lit(1.0)).drop("manuallabel").
+      filter(length($"labels") >= 2)
     // 获取网站类别
-    val webLabelDf = labelsDS.select("itemString", "webLabel").withColumn("rating", lit(1.0))
+    val webLabelDf = labelsDS.select("itemString", "webLabel").withColumn("rating", lit(1.0)).
+      filter(length($"webLabel") >= 2)
     // 获取网站名称
-    val webNameDf = labelsDS.select("itemString", "webName").withColumn("rating", lit(1.0))
+    val webNameDf = labelsDS.select("itemString", "webName").withColumn("rating", lit(1.0)).
+      filter(length($"webName") >= 2)
     // 获取行政区划
-    val distDf = labelsDS.select("itemString", "dist").withColumn("rating", lit(1.0))
+    val distDf = labelsDS.select("itemString", "dist").withColumn("rating", lit(1.0)).
+      filter(length($"dist") >= 2)
 
     // 分组排序窗口函数
     val w = Window.partitionBy("userString").orderBy(col("score").desc)
@@ -325,7 +332,16 @@ object CountLabel {
     // 数据合并
     val joinedDf = df_m.join(df_l, Seq("YHID"), "outer").join(df_t, Seq("YHID"), "outer").join(df_d, Seq("YHID"), "outer").
       withColumn("CJSJ", current_timestamp()).withColumn("CJSJ", date_format($"CJSJ", "yyyy-MM-dd"))
-
+/*
+joinedDf.printSchema
+root
+ |-- YHID: string (nullable = true)
+ |-- WZBQTJ: string (nullable = true)
+ |-- WZLBTJ: string (nullable = true)
+ |-- WZTJ: string (nullable = true)
+ |-- XZQHTJ: string (nullable = true)
+ |-- CJSJ: string (nullable = false)
+ */
 
     // 将joinedDf保存到YLZX_TJ_YHXW表中，本地测试
     val url2 = "jdbc:mysql://localhost:3306/ylzx?useUnicode=true&characterEncoding=UTF-8"

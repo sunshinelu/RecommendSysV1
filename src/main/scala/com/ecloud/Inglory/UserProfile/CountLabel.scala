@@ -296,7 +296,8 @@ object CountLabel {
      */
 
     // 文章标签
-    val user_manuallableRdd = user_manuallableDf.rdd.map { case Row(userString: String, words: String) => (userString, words) }.reduceByKey(_ + ";" + _).
+    val user_manuallableRdd = user_manuallableDf.rdd.
+      map { case Row(userString: String, words: String) => (userString, words) }.reduceByKey(_ + ";" + _).
       map(x => {
         val userString = x._1.toString
         val solrWords = x._2.toString

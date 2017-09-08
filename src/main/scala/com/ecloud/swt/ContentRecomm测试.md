@@ -374,6 +374,9 @@ val document = tfidfDF2.select("itemID", "tfidfVec").na.drop.rdd.map {
         prop2.setProperty("password", "ylzx")
         //清空SPEC_LOG_RECOM表
 
+import java.sql.DriverManager
+
+
         def truncateMysql(url: String, user: String, password:String, tableName:String) : Unit ={
             //驱动程序名
             val driver = "com.mysql.jdbc.Driver"

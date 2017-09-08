@@ -258,7 +258,8 @@ object ContentRecomm {
     4. item-based recommendation
      */
     val itemLab = tfidfDF2.select("itemID", "itemString")
-    val itemLab2 = tfidfDF2.select("itemString", "title", "manuallabel", "time")
+    val itemLab2 = tfidfDF2.select("itemID","itemString", "title", "manuallabel", "time").
+      withColumnRenamed("itemID","doc2")
 
     val logsDS3 = logsDS2.join(itemLab, Seq("itemString"), "left").na.drop().withColumnRenamed("itemID", "doc1")
 
@@ -266,12 +267,12 @@ object ContentRecomm {
       withColumn("score", col("rating") * col("sims")).
       groupBy("operatorId", "userString", "doc2").agg(sum("score")).withColumnRenamed("sum(score)", "rating")
 
-    val logsDS4 = logsDS3.withColumnRenamed("doc1", "doc2").
+    val logsDS4 = logsDS3.withColumnRenamed("doc1", "doc2").drop("rating").drop("itemString").
       withColumn("whether", lit(1))
 
     val joinedDf2 = joinedDf1.join(logsDS4, Seq("operatorId", "userString", "doc2"), "left").filter(col("whether").isNull)
 
-    val joinedDf3 = joinedDf2.join(itemLab2, Seq("itemString"), "left").drop("whether")
+    val joinedDf3 = joinedDf2.join(itemLab2, Seq("doc2"), "left").drop("whether")
 
     //对dataframe进行分组排序，并取每组的前5个
     val w = Window.partitionBy("userString").orderBy(col("time").desc)

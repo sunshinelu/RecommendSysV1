@@ -54,7 +54,7 @@ object CountLabel {
     Logger.getRootLogger().setLevel(Level.OFF)
   }
 
-  case class LogView(CREATE_BY_ID: String, CREATE_TIME_L: Long,CREATE_TIME: String, REQUEST_URI: String, PARAMS: String)
+  case class LogView(CREATE_BY_ID: String, CREATE_TIME_L: Long, CREATE_TIME: String, REQUEST_URI: String, PARAMS: String)
 
   case class LogView2(userString: String, itemString: String, CREATE_TIME: String, value: Double)
 
@@ -76,8 +76,8 @@ object CountLabel {
     val cal: Calendar = Calendar.getInstance()
     val N = 1
     //  cal.add(Calendar.DATE, -N)//获取N天前或N天后的时间，-2为2天前
-//    cal.add(Calendar.YEAR, -N) //获取N年或N年后的时间，-2为2年前
-        cal.add(Calendar.MONTH, -N) //获取N月或N月后的时间，-2为2月前
+    //    cal.add(Calendar.YEAR, -N) //获取N年或N年后的时间，-2为2年前
+    cal.add(Calendar.MONTH, -N) //获取N月或N月后的时间，-2为2月前
     val nDaysAgo = dateFormat.format(cal.getTime())
     val nDaysAgoL = dateFormat.parse(nDaysAgo).getTime
 
@@ -119,24 +119,28 @@ object CountLabel {
 
         val requestURL = Bytes.toString(x._3)
         val parmas = Bytes.toString(x._4)
-        LogView(userID, creatTimeL, creatTimeS,requestURL, parmas)
+        LogView(userID, creatTimeL, creatTimeS, requestURL, parmas)
       }
-      }.filter(x => x.REQUEST_URI.contains("search/getContentById.do") || x.REQUEST_URI.contains("like/add.do") ||
-      x.REQUEST_URI.contains("favorite/add.do") || x.REQUEST_URI.contains("favorite/delete.do")
+      }.filter(x => x.REQUEST_URI.contains("getContentById.do") || x.REQUEST_URI.contains("like/add.do") ||
+      x.REQUEST_URI.contains("favorite/add.do") || x.REQUEST_URI.contains("favorite/delete.do") ||
+      x.REQUEST_URI.contains("addFavorite.do") || x.REQUEST_URI.contains("delFavorite.do")
     ).filter(_.CREATE_TIME_L >= nDaysAgoL).
       filter(_.PARAMS.toString.length >= 10).
       map(x => {
         val userID = x.CREATE_BY_ID.toString
         //        val reg2 = """id=(\w+\.){2}\w+.*,""".r
-        val reg2 = """id=\S*,|id=\S*}""".r
+        val reg2 =
+          """id=\S*,|id=\S*}""".r
         val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=", "").replace(",)", "").replace("})", "")
         val time = x.CREATE_TIME
         val value = 1.0
         val rating = x.REQUEST_URI match {
-          case r if (r.contains("search/getContentById.do")) => 1.0 * value //0.2
+          case r if (r.contains("getContentById.do")) => 1.0 * value //0.2
           case r if (r.contains("like/add.do")) => 1.0 * value //0.3
           case r if (r.contains("favorite/add.do")) => 1.0 * value //0.5
+          case r if (r.contains("addFavorite.do")) => 1.0 * value //0.5
           case r if (r.contains("favorite/delete.do")) => -1.0 * value //-0.5
+          case r if (r.contains("delFavorite.do")) => -1.0 * value //-0.5
           case _ => 0.0 * value
         }
 
@@ -146,7 +150,7 @@ object CountLabel {
     hbaseRDD
   }
 
-  case class LabelView(itemString: String, manuallabel: String, webLabel:String, webName:String, dist:String)
+  case class LabelView(itemString: String, manuallabel: String, webLabel: String, webName: String, dist: String)
 
   def getLabelsRDD(ylzxTable: String, sc: SparkContext): RDD[LabelView] = {
     val conf = HBaseConfiguration.create() //在HBaseConfiguration设置可以将扫描限制到部分列，以及限制扫描的时间范围
@@ -184,23 +188,30 @@ object CountLabel {
         LabelView(urlID_1, manuallabel_1, webLabel_1, webName_1, dist_1)
       }
       ).filter(_.manuallabel.length >= 2)
-      /*.flatMap {
-      case (id, manuallabel) => manuallabel.split(";").map((id, _))
-    }.map(x => {
-      val rowkey = x._1
-      val label = x._2
-      val value = 1.0
-      LabelView(rowkey, label, value)
-    })
+    /*.flatMap {
+    case (id, manuallabel) => manuallabel.split(";").map((id, _))
+  }.map(x => {
+    val rowkey = x._1
+    val label = x._2
+    val value = 1.0
+    LabelView(rowkey, label, value)
+  })
 */
     hbaseRDD
   }
 
-  case class WZBQTJschema(YHID:String, WZBQTJ:String) //网站标签
-  case class XZQHTJschema(YHID:String, XZQHTJ:String) //行政区划
-  case class WZLBTJschema(YHID:String, WZLBTJ:String) //网站类别
-  case class WZTJschema(YHID:String, WZTJ:String) //网站名称
+  case class WZBQTJschema(YHID: String, WZBQTJ: String)
 
+  //网站标签
+  case class XZQHTJschema(YHID: String, XZQHTJ: String)
+
+  //行政区划
+  case class WZLBTJschema(YHID: String, WZLBTJ: String)
+
+  //网站类别
+  case class WZTJschema(YHID: String, WZTJ: String)
+
+  //网站名称
 
 
   def main(args: Array[String]) {
@@ -211,7 +222,7 @@ object CountLabel {
     1. bulid spark environment
      */
 
-    val sparkConf = new SparkConf().setAppName(s"CountLabel")//.setMaster("local[*]").set("spark.executor.memory", "2g")
+    val sparkConf = new SparkConf().setAppName(s"CountLabel") //.setMaster("local[*]").set("spark.executor.memory", "2g")
     val spark = SparkSession.builder().config(sparkConf).getOrCreate()
     val sc = spark.sparkContext
     import spark.implicits._
@@ -220,15 +231,15 @@ object CountLabel {
     val ylzxTable = args(0)
     val logsTable = args(1)
 
-/*
-    val ylzxTable = "yilan-total_webpage"
-    val logsTable = "t_hbaseSink"
-*/
+    /*
+        val ylzxTable = "yilan-total_webpage"
+        val logsTable = "t_hbaseSink"
+    */
 
     // 获取日志数据
     val logsRDD = getLogsRDD(logsTable, sc)
     val logsDS = spark.createDataset(logsRDD).groupBy("userString", "itemString").agg(sum("value")).drop("value").
-      withColumnRenamed("sum(value)","value")
+      withColumnRenamed("sum(value)", "value")
 
 
     // 获取易览资讯标签数据
@@ -256,11 +267,11 @@ object CountLabel {
     // 分组排序窗口函数
     val w = Window.partitionBy("userString").orderBy(col("score").desc)
     // 合并两列数据
-    val combinColUDF = udf((col1:String, col2:Double) => col1 + ":" + col2.toString)
+    val combinColUDF = udf((col1: String, col2: Double) => col1 + ":" + col2.toString)
 
 
     // 文章标签取前30
-    val user_manuallableDf = logsDS.join(manuallableDf, Seq("itemString"),"left").na.drop().
+    val user_manuallableDf = logsDS.join(manuallableDf, Seq("itemString"), "left").na.drop().
       withColumn("score", round($"value" * $"rating")).drop("value").drop("rating").
       groupBy("userString", "labels").agg(sum("score")).drop("score").withColumnRenamed("sum(score)", "score").
       withColumn("rn", row_number.over(w)).where(col("rn") <= 30).drop("rn").
@@ -268,7 +279,7 @@ object CountLabel {
       select("userString", "WZBQTJ")
 
     // 网站类别取前10
-    val user_webLabelDf = logsDS.join(webLabelDf, Seq("itemString"),"left").na.drop().
+    val user_webLabelDf = logsDS.join(webLabelDf, Seq("itemString"), "left").na.drop().
       withColumn("score", round($"value" * $"rating")).drop("value").drop("rating").
       groupBy("userString", "webLabel").agg(sum("score")).drop("score").withColumnRenamed("sum(score)", "score").
       withColumn("rn", row_number.over(w)).where(col("rn") <= 10).drop("rn").
@@ -276,7 +287,7 @@ object CountLabel {
       select("userString", "WZLBTJ")
 
     // 网站名称取前3
-    val user_webNameDf = logsDS.join(webNameDf, Seq("itemString"),"left").na.drop().
+    val user_webNameDf = logsDS.join(webNameDf, Seq("itemString"), "left").na.drop().
       withColumn("score", round($"value" * $"rating")).drop("value").drop("rating").
       groupBy("userString", "webName").agg(sum("score")).drop("score").withColumnRenamed("sum(score)", "score").
       withColumn("rn", row_number.over(w)).where(col("rn") <= 3).drop("rn").
@@ -284,7 +295,7 @@ object CountLabel {
       select("userString", "WZTJ")
 
     // 行政区划取前20
-    val user_distDf = logsDS.join(distDf, Seq("itemString"),"left").na.drop().
+    val user_distDf = logsDS.join(distDf, Seq("itemString"), "left").na.drop().
       withColumn("score", round($"value" * $"rating")).drop("value").drop("rating").
       groupBy("userString", "dist").agg(sum("score")).drop("score").withColumnRenamed("sum(score)", "score").
       withColumn("rn", row_number.over(w)).where(col("rn") <= 20).drop("rn").
@@ -335,26 +346,31 @@ object CountLabel {
     // 数据合并
     val joinedDf = df_m.join(df_l, Seq("YHID"), "outer").join(df_t, Seq("YHID"), "outer").join(df_d, Seq("YHID"), "outer").
       withColumn("CJSJ", current_timestamp()).withColumn("CJSJ", date_format($"CJSJ", "yyyy-MM-dd"))
-/*
-joinedDf.printSchema
-root
- |-- YHID: string (nullable = true)
- |-- WZBQTJ: string (nullable = true)
- |-- WZLBTJ: string (nullable = true)
- |-- WZTJ: string (nullable = true)
- |-- XZQHTJ: string (nullable = true)
- |-- CJSJ: string (nullable = false)
- */
+    /*
+    joinedDf.printSchema
+    root
+     |-- YHID: string (nullable = true)
+     |-- WZBQTJ: string (nullable = true)
+     |-- WZLBTJ: string (nullable = true)
+     |-- WZTJ: string (nullable = true)
+     |-- XZQHTJ: string (nullable = true)
+     |-- CJSJ: string (nullable = false)
+     */
 
-    // 将joinedDf保存到YLZX_TJ_YHXW表中，本地测试
-    val url2 = "jdbc:mysql://localhost:3306/ylzx?useUnicode=true&characterEncoding=UTF-8"
-    //使用"?useUnicode=true&characterEncoding=UTF-8"以防止出现存入MySQL数据库中中文乱码情况
-    val prop2 = new Properties()
-    prop2.setProperty("user", "root")
-    prop2.setProperty("password", "root")
-    joinedDf.write.mode("append").jdbc(url2, "YLZX_TJ_YHXW", prop2)
+//    val myID = "175786f8-1e74-4d6c-94e9-366cf1649721"
+//    joinedDf.filter($"YHID" === myID).show
 
     /*
+// 将joinedDf保存到YLZX_TJ_YHXW表中，本地测试
+val url2 = "jdbc:mysql://localhost:3306/ylzx?useUnicode=true&characterEncoding=UTF-8"
+//使用"?useUnicode=true&characterEncoding=UTF-8"以防止出现存入MySQL数据库中中文乱码情况
+val prop2 = new Properties()
+prop2.setProperty("user", "root")
+prop2.setProperty("password", "root")
+joinedDf.write.mode("append").jdbc(url2, "YLZX_TJ_YHXW", prop2)
+
+*/
+
     //将joinedDf保存到YLZX_TJ_YHXW表中
     val url2 = "jdbc:mysql://192.168.37.102:3306/ylzx?useUnicode=true&characterEncoding=UTF-8"
     //使用"?useUnicode=true&characterEncoding=UTF-8"以防止出现存入MySQL数据库中中文乱码情况
@@ -362,7 +378,7 @@ root
     prop2.setProperty("user", "ylzx")
     prop2.setProperty("password", "ylzx")
     joinedDf.write.mode("append").jdbc(url2, "YLZX_TJ_YHXW", prop2)
-*/
+
 
     sc.stop()
     spark.stop()

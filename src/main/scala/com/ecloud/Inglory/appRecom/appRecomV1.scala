@@ -107,8 +107,9 @@ object appRecomV1 {
         val parmas = Bytes.toString(x._4)
         LogView(userID, creatTimeL, requestURL, parmas)
       }
-      }.filter(x => x.REQUEST_URI.contains("search/getContentById.do") || x.REQUEST_URI.contains("like/add.do") ||
-      x.REQUEST_URI.contains("favorite/add.do") || x.REQUEST_URI.contains("favorite/delete.do")
+      }.filter(x => x.REQUEST_URI.contains("getContentById.do") || x.REQUEST_URI.contains("like/add.do") ||
+      x.REQUEST_URI.contains("favorite/add.do") || x.REQUEST_URI.contains("favorite/delete.do") ||
+      x.REQUEST_URI.contains("addFavorite.do") || x.REQUEST_URI.contains("delFavorite.do")
     ).
       filter(_.PARAMS.toString.length >= 10).
       map(x => {
@@ -119,10 +120,12 @@ object appRecomV1 {
         val time = x.CREATE_TIME
         val value = 1.0
         val rating = x.REQUEST_URI match {
-          case r if (r.contains("search/getContentById.do")) => 0.2 * value
+          case r if (r.contains("getContentById.do")) => 0.2 * value
           case r if (r.contains("like/add.do")) => 0.3 * value
           case r if (r.contains("favorite/add.do")) => 0.5 * value
+          case r if (r.contains("addFavorite.do")) => 0.5 * value //0.5
           case r if (r.contains("favorite/delete.do")) => -0.5 * value
+          case r if (r.contains("delFavorite.do")) => -0.5 * value //-0.5
           case _ => 0.0 * value
         }
 

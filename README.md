@@ -758,3 +758,31 @@ count 't_hbaseSink'
 
     count 'ylzx_xgwz'
     => 494187
+    
+时间：2017年09月08日
+
+count 't_hbaseSink'
+=> 1579627
+
+日志规则
+
+app：
+addFavorite.do 收藏
+delFavorite.do 取消收藏
+addComment.do 评论
+getContentById.do 浏览
+
+web：
+getContentById.do 浏览
+favorite/add.do 收藏
+favorite/delete.do 取消收藏
+like/add.do 点赞
+
+使用以下几种：
+getContentById.do 浏览
+favorite/add.do 收藏
+addFavorite.do 收藏
+favorite/delete.do 取消收藏
+delFavorite.do 取消收藏
+like/add.do 点赞
+addComment.do 评论(暂时不使用)

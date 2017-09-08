@@ -171,7 +171,7 @@ object hotLabelsV4 {
         val parmas = Bytes.toString(x._4)
         LogView(userID, requestURL, parmas)
       }
-      }.filter(x => x.REQUEST_URI.contains("search/getContentById.do")).
+      }.filter(x => x.REQUEST_URI.contains("getContentById.do")).
       filter(_.PARAMS.toString.length >= 10).
       map(x => {
         val userID = x.CREATE_BY_ID.toString

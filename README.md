@@ -786,3 +786,72 @@ favorite/delete.do 取消收藏
 delFavorite.do 取消收藏
 like/add.do 点赞
 addComment.do 评论(暂时不使用)
+
+时间：2017年09月11日
+
+count 't_hbaseSink'
+=> 1679131
+
+=> 1679131
+
+=> 1679131
+
+=> 1679131
+
+t_hbaseSink表中的数据没有增加，数据存入的最新时间刚好与易览资讯部署时间相一致。
+ 使用 yarn application -list查看改任务，任务仍在运行，
+
+重新提交ylzx_logsToHbase任务。
+
+nohup ./ylzx_logsToHbase.sh > logsToHbase.out 2>&1 &
+
+[1] 25053
+application_1504508652498_0556
+
+count 't_hbaseSink'
+=> 1679174
+
+=> 1679291
+
+=> 1679457
+
+=> 1679506
+
+=> 1681229 （16:37）
+
+
+时间：2017年09月12日
+
+count 't_hbaseSink'
+
+=> 1685981
+
+=> 1686516
+
+
+count 'yilan-total_webpage'
+
+=> 173957
+
+时间：2017年09月13日
+
+count 'ylzx_xgwz'
+
+=> 565501
+
+时间：2017年09月14日
+
+count 'yilan-total_webpage'
+=> 178535
+
+count 't_hbaseSink'
+
+=> 1704832
+
+=> 1705020
+
+=> 1706065
+
+count 'ylzx_xgwz'
+
+=> 574941

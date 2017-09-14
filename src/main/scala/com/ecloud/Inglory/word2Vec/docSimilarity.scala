@@ -27,7 +27,7 @@ import org.apache.spark.storage.StorageLevel
 /**
  * Created by sunlu on 17/5/20.
  * 由于计算文章相似性的代码运行时间较长（超过4小时），现修改计算文章相似性计算策略。
- * 获取近半年的数据进行分析
+ * 获取近一月的数据进行分析
  * 使用word2vec构建特征矩阵
  * 然后使用RDD的分布式矩阵计算相似性
  * 运行成功！
@@ -72,7 +72,7 @@ object docSimilarity {
     val todayL = dateFormat.parse(today).getTime
     //获取N天的时间，并把时间转换成long类型
     val cal: Calendar = Calendar.getInstance()
-    val N = 6
+    val N = 1
 //      cal.add(Calendar.DATE, -N)//获取N天前或N天后的时间，-2为2天前
 //    cal.add(Calendar.YEAR, -N) //获取N年或N年后的时间，-2为2年前
         cal.add(Calendar.MONTH, -N) //获取N月或N月后的时间，-2为2月前

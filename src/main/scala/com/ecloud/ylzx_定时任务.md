@@ -38,6 +38,10 @@ crontab -u root -e
 
 0 7 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_appRecom.sh
 
+添加用户行为定时任务－2017年09月11日
+
+20 4 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_tj_yhxw.sh
+
 
 4.重新启动服务
 service crond restart

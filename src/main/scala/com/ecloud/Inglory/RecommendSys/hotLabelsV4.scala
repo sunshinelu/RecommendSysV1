@@ -74,14 +74,14 @@ object hotLabelsV4 {
         StructField("hotWords", StringType)
         :: Nil)
     val df5 = spark.createDataFrame(rdd4, schema2)
-    //将df4保存到hotWords_Test表中
-    val url2 = "jdbc:mysql://192.168.37.18:3306/recommender_test?useUnicode=true&characterEncoding=UTF-8"
+    //将df5保存到hotWords_Test表中
+    val url2 = "jdbc:mysql://192.168.37.102:3306/ylzx?useUnicode=true&characterEncoding=UTF-8"
     //使用"?useUnicode=true&characterEncoding=UTF-8"以防止出现存入MySQL数据库中中文乱码情况
     val prop2 = new Properties()
-    prop2.setProperty("user", "root")
-    prop2.setProperty("password", "root")
+    prop2.setProperty("user", "ylzx")
+    prop2.setProperty("password", "ylzx")
     //将结果保存到数据框中
-    df5.write.mode("append").jdbc(url2, "hotWords_Test", prop2)//overwrite
+    df5.write.mode("append").jdbc(url2, "YLZX_HOT_WORDS", prop2)//overwrite
 
     sc.stop()
     spark.stop()

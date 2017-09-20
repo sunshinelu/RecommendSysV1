@@ -855,3 +855,23 @@ count 't_hbaseSink'
 count 'ylzx_xgwz'
 
 => 574941
+
+时间：2017年09月20日
+
+count 't_hbaseSink'
+
+=> 1746504
+
+=> 1746594
+
+
+日志规则：
+
+热门标签的点击情况：（REQUEST_URI    PARAMS）
+search.do    manuallabel=政务, sType=index}	
+
+搜索框检索情况：（REQUEST_URI    PARAMS）
+searchByKeyword.do    {cuPage=1, keyword=大数据}
+
+栏目点击情况：（REQUEST_URI    PARAMS）
+search.do    {sType=index, xzqhname=中国}

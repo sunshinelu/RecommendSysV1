@@ -875,3 +875,17 @@ searchByKeyword.do    {cuPage=1, keyword=大数据}
 
 栏目点击情况：（REQUEST_URI    PARAMS）
 search.do    {sType=index, xzqhname=中国}
+
+时间：2017年09月22日
+
+count 't_hbaseSink'
+
+=> 3252149
+
+count 'docsimi_title'
+
+=> 622711
+
+count 'ylzx_xgwz'
+
+=> 607272

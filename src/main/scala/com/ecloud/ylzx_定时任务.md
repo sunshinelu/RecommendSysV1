@@ -42,6 +42,10 @@ crontab -u root -e
 
 20 4 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_tj_yhxw.sh
 
+删除ylzx_xgwz.sh定时任务－2017年09月22日
+
+30 18 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_xgwz.sh
+
 
 4.重新启动服务
 service crond restart

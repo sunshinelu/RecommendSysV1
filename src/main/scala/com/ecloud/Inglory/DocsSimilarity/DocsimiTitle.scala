@@ -17,8 +17,8 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 
 /**
- * Created by sunlu on 17/9/22.
- */
+  * Created by sunlu on 17/9/22.
+  */
 object DocsimiTitle {
 
   def main(args: Array[String]) {
@@ -38,7 +38,7 @@ object DocsimiTitle {
     val docSimiTable = "ylzx_xgwz"
      */
 
-    val ylzxRDD = DocsimiUtil.getYlzxSegYRDD(ylzxTable, 20, sc)
+    val ylzxRDD = DocsimiUtil.getYlzxSegYRDD(ylzxTable, 1, sc)
     val ylzxDS = spark.createDataset(ylzxRDD).drop("segWords")
 
     val stopwordsFile = "/personal/sunlu/lulu/yeeso/Stopwords.dic"
@@ -47,7 +47,7 @@ object DocsimiTitle {
 
     //定义UDF
     //分词、停用词过滤
-    def segWordsFunc(title:String ,content: String): Seq[String] = {
+    def segWordsFunc(title: String, content: String): Seq[String] = {
       //每篇文章提取5个关键词
       val kwc = new KeyWordComputer(5)
       val keywords = kwc.computeArticleTfidf(title, content).toArray.map(_.toString.split("/")).
@@ -63,8 +63,8 @@ object DocsimiTitle {
       result
     }
 
-    val segWordsUDF = udf((title:String ,content: String) => segWordsFunc(title, content))
-    val segDF = ylzxDS.withColumn("segWords", segWordsUDF($"title",$"content")).drop("content") //.filter(!$"segWords".contains("null"))
+    val segWordsUDF = udf((title: String, content: String) => segWordsFunc(title, content))
+    val segDF = ylzxDS.withColumn("segWords", segWordsUDF($"title", $"content")).drop("content") //.filter(!$"segWords".contains("null"))
 
     /*
    calculate tf-idf value
@@ -114,20 +114,20 @@ using Jaccard Distance calculate doc-doc similarity
     //设置查询的表名
     //    hbaseConf.set(TableInputFormat.INPUT_TABLE, ylzxTable) //设置输入表名
 
-    /*
+
     //如果outputTable存在则不做任何操作，如果HBASE表不存在则新建表
     val hadmin = new HBaseAdmin(hbaseConf)
     if (!hadmin.isTableAvailable(docSimiTable)) {
       print("Table Not Exists! Create Table")
       val tableDesc = new HTableDescriptor(TableName.valueOf(docSimiTable))
       tableDesc.addFamily(new HColumnDescriptor("info".getBytes()))
-//      tableDesc.addFamily(new HColumnDescriptor("f".getBytes()))
+      //      tableDesc.addFamily(new HColumnDescriptor("f".getBytes()))
       hadmin.createTable(tableDesc)
-    }else{
+    } else {
       print("Table  Exists!  not Create Table")
     }
-*/
 
+    /*
     //如果outputTable表存在，则删除表；如果不存在则新建表。=> START
     val hAdmin = new HBaseAdmin(hbaseConf)
     if (hAdmin.tableExists(docSimiTable)) {
@@ -139,7 +139,7 @@ using Jaccard Distance calculate doc-doc similarity
     htd.addFamily(new HColumnDescriptor("info".getBytes()))
     hAdmin.createTable(htd)
     //如果outputTable表存在，则删除表；如果不存在则新建表。=> OVER
-
+    */
     //指定输出格式和输出表名
     hbaseConf.set(TableOutputFormat.OUTPUT_TABLE, docSimiTable) //设置输出表名
 

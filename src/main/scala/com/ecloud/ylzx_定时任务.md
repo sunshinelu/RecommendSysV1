@@ -11,7 +11,7 @@
 http://blog.csdn.net/blank1990/article/details/50457380
 
 1.进入root账户
-sudo root
+su root
 2查看crontab服务状态
 service crond status
 
@@ -42,10 +42,13 @@ crontab -u root -e
 
 20 4 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_tj_yhxw.sh
 
-删除ylzx_xgwz.sh定时任务－2017年09月22日
+删除slave4上ylzx_xgwz.sh定时任务－2017年09月22日
 
-30 18 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_xgwz.sh
+在slave6上添加定时任务
 
+0 8 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_xgwz.sh
+
+0 22 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_cnxh.sh
 
 4.重新启动服务
 service crond restart

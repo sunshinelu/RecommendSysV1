@@ -889,3 +889,17 @@ count 'docsimi_title'
 count 'ylzx_xgwz'
 
 => 607272
+
+时间：2017年09月25日
+
+count 'yilan-total_webpage'
+
+=> 190958
+
+count 't_hbaseSink'
+
+=> 3286720
+
+=> 3286764
+
+count 'yilan-total-analysis_webpage'

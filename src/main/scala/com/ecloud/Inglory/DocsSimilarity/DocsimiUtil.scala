@@ -239,7 +239,7 @@ object DocsimiUtil extends Serializable{
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("manuallabel")) //label
     scan.addColumn(Bytes.toBytes("f"), Bytes.toBytes("mod")) //time
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //
-    scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("appc"))
+   // scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("appc"))
 
     // scan.setTimeRange(1400468400000L, 1400472000000L)
     conf.set(TableInputFormat.SCAN, convertScanToString(scan))
@@ -254,10 +254,10 @@ object DocsimiUtil extends Serializable{
       val label = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("manuallabel")) //标签列
       val time = v.getValue(Bytes.toBytes("f"), Bytes.toBytes("mod")) //时间列
       val webName = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //网站名列
-      val appc = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("appc")) //appc
-      (urlID, title, content, label, time, webName, appc)
+     // val appc = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("appc")) //appc
+      (urlID, title, content, label, time, webName)
     }
-    }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5 & null != x._6 & null != x._7).
+    }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5 & null != x._6).
       map { x => {
         val urlID_1 = Bytes.toString(x._1)
         val title_1 = Bytes.toString(x._2)
@@ -333,7 +333,7 @@ object DocsimiUtil extends Serializable{
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("manuallabel")) //label
     scan.addColumn(Bytes.toBytes("f"), Bytes.toBytes("mod")) //time
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //
-    scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("appc"))
+    //scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("appc"))
 
     // scan.setTimeRange(1400468400000L, 1400472000000L)
     conf.set(TableInputFormat.SCAN, convertScanToString(scan))
@@ -348,10 +348,10 @@ object DocsimiUtil extends Serializable{
       val label = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("manuallabel")) //标签列
       val time = v.getValue(Bytes.toBytes("f"), Bytes.toBytes("mod")) //时间列
       val webName = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //网站名列
-      val appc = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("appc")) //appc
-      (urlID, title, content, label, time, webName, appc)
+     // val appc = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("appc")) //appc
+      (urlID, title, content, label, time, webName)
     }
-    }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5 & null != x._6 & null != x._7).
+    }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5 & null != x._6).
       map { x => {
         val urlID_1 = Bytes.toString(x._1)
         val title_1 = Bytes.toString(x._2)

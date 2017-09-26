@@ -34,7 +34,8 @@ object DocsimiTitle {
 
     /*
 
-    val ylzxTable = "yilan-total_webpage"
+    // val ylzxTable = "yilan-total_webpage"
+        val ylzxTable = "yilan-total-analysis_webpage"
     val docSimiTable = "ylzx_xgwz"
      */
 

@@ -142,11 +142,12 @@ object CheckTotalTable {
     val ylzxTable = "yilan-total-analysis_webpage"
 
     val ylzxRDD = getYlzxSegYRDD(ylzxTable, 1, sc)
-    val ylzxDS = spark.createDataset(ylzxRDD).drop("segWords")
-    println("ylzxDS is: " + ylzxDS.count())
+    val ylzxDS = spark.createDataset(ylzxRDD).drop("segWords").select("title")
+    ylzxDS.show(5,false)
+//    println("ylzxDS is: " + ylzxDS.count())
 
 
-
+/*
     //load stopwords file
     val stopwordsFile = "/personal/sunlu/lulu/yeeso/Stopwords.dic"
     //    val stopwords = sc.textFile(stopwordsFile).collect().toList
@@ -235,7 +236,7 @@ object CheckTotalTable {
       YlzxSegSchema2(id, urlID, title, label, time, websitename, content,segWords)
     }).filter(x => null != x.segWords).filter(_.segWords.size > 1) //.randomSplit(Array(0.1,0.9))(0)
 
-
+*/
 
 
 

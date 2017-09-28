@@ -903,3 +903,15 @@ count 't_hbaseSink'
 => 3286764
 
 count 'yilan-total-analysis_webpage'
+
+时间：2017年09月28日
+
+count 't_hbaseSink'
+
+=> 3384424
+
+=> 3384522
+
+count 'yilan-total-analysis_webpage'
+
+=> 192177

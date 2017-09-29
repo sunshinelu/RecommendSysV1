@@ -25,14 +25,14 @@ object DocsimiUtil extends Serializable{
     val proto = ProtobufUtil.toScan(scan)
     Base64.encodeBytes(proto.toByteArray)
   }
-  case class YlzxSchema(itemString: String, title: String, manuallabel: String, time: String, websitename: String, content: String)
+  case class YlzxSchema(itemString: String, title: String, manuallabel: String, time: String,timeL:Long, websitename: String, content: String)
 
   case class LogView(CREATE_BY_ID: String, CREATE_TIME: Long, REQUEST_URI: String, PARAMS: String)
 
   case class LogView2(userString: String, itemString: String, CREATE_TIME: Long, value: Double)
 
 
-  def getYlzxRDD(ylzxTable: String, year: Int, sc: SparkContext): RDD[YlzxSchema] = {
+  def getYlzxYRDD(ylzxTable: String, year: Int, sc: SparkContext): RDD[YlzxSchema] = {
     //定义时间格式
     // val dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy hh:mm:ss z", Locale.ENGLISH)
     val dateFormat = new SimpleDateFormat("yyyy-MM-dd") // yyyy-MM-dd HH:mm:ss或者 yyyy-MM-dd
@@ -97,7 +97,7 @@ object DocsimiUtil extends Serializable{
       val date: Date = new Date(x._4)
       val time = dateFormat.format(date)
       val content = x._6.replace("&nbsp;", "").replaceAll("\\uFFFD", "").replaceAll("([\\ud800-\\udbff\\udc00-\\udfff])", "")
-      YlzxSchema(x._1, x._2, x._3, time, x._5, content)
+      YlzxSchema(x._1, x._2, x._3, time,x._4, x._5, content)
     })
 
     hbaseRDD

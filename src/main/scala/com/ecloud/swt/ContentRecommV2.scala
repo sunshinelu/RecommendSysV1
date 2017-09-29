@@ -188,8 +188,10 @@ object ContentRecommV2 {
     val ylzxDS = spark.createDataset(ylzxRDD)
 
     val logsRDD = getLogsRDD(logsTable, spark, sc)
-    val logsDS = spark.createDataset(logsRDD).na.drop(Array("userString")).filter($"operatorId" === "7a4e4f92-7357-4057-8b39-7f5f96f341c2")
-    val logsDS2 = logsDS.groupBy("operatorId", "userString", "itemString").agg(sum("value")).withColumnRenamed("sum(value)", "rating")
+    val logsDS = spark.createDataset(logsRDD).na.drop(Array("userString")).
+      filter($"operatorId" === "7a4e4f92-7357-4057-8b39-7f5f96f341c2")
+    val logsDS2 = logsDS.groupBy("operatorId", "userString", "itemString").
+      agg(sum("value")).withColumnRenamed("sum(value)", "rating")
 
     /*
        3. string to number
@@ -263,28 +265,46 @@ object ContentRecommV2 {
     val colRenamed = Seq("doc1Id", "doc1", "doc2Id", "doc2", "doc2_title",
       "doc2_label", "doc2_time", "distCol")
 
-    val mhSimiDF = docsimi_mh.select("datasetA.itemID", "datasetA.itemString", "datasetB.itemID", "datasetB.urlID", "datasetB.title",
+    val mhSimiDF = docsimi_mh.select("datasetA.itemID", "datasetA.itemString", "datasetB.itemID", "datasetB.itemString", "datasetB.title",
       "datasetB.manuallabel", "datasetB.time", "distCol").toDF(colRenamed: _*).
-      filter($"doc1Id" =!= $"doc2Id")
+      filter($"doc1Id" =!= $"doc2Id").withColumn("distCol", $"distCol" * (-1) + 1)
 
-    //对dataframe进行分组排序，并取每组的前5个
-    val w = Window.partitionBy("doc1Id").orderBy(col("distCol").asc)
-    val mhSortedDF = mhSimiDF.withColumn("rn", row_number.over(w)).where(col("rn") <= 5)
-
-    val docsimiDF = mhSortedDF.select("doc1", "doc2", "distCol", "rn", "doc2_title",
-      "doc2_label", "doc2_time")
 
     /*
     7. content based document similarity calculation
      */
 
+    //val logsDS2 = logsDS.groupBy("operatorId", "userString", "itemString").agg(sum("value")).withColumnRenamed("sum(value)", "rating")
+
+    val content_df1 = logsDS2.withColumnRenamed("itemString", "doc1").join(mhSimiDF, Seq("doc1") ,"left").
+      withColumn("content_rating", col("rating") * col("distCol")).drop("distCol").drop("rating").na.drop()
+    val content_df2 = logsDS2.select("userString", "itemString").withColumnRenamed("itemString" ,"doc2")
+
+    val content_df3 = content_df1.join(content_df2, Seq("userString" ,"doc2"), "leftanti").na.drop().
+    groupBy("operatorId","userString", "doc2","doc2_title", "doc2_time").agg(sum($"content_rating")).drop("content_rating").
+      withColumnRenamed("sum(content_rating)", "rating")
 
 
+    //对dataframe进行分组排序，并取每组的前6个
+    val w = Window.partitionBy("userString").orderBy(col("rating").desc)
+    val content_df4 = content_df3.withColumn("rn", row_number.over(w)).where(col("rn") <= 6)
 
-    /*
-    未完待续......
+    val columnsRenamed = Seq("USERNAME", "OPERATOR_ID", "ATICLEID", "TITLE", "ATICLETIME", "CREATETIME", "RATE")
+    val content_df5 = content_df4.withColumn("systime", current_timestamp()).
+      withColumn("systime", date_format($"systime", "yyyy-MM-dd HH:mm:ss")).
+      select("userString", "operatorId", "doc2", "doc2_title", "doc2_time", "systime", "rn").
+      toDF(columnsRenamed: _*)
 
-     */
+    //将df4保存到hotWords_Test表中
+    val url2 = "jdbc:mysql://192.168.37.102:3306/ylzx?useUnicode=true&characterEncoding=UTF-8"
+    //使用"?useUnicode=true&characterEncoding=UTF-8"以防止出现存入MySQL数据库中中文乱码情况
+    val prop2 = new Properties()
+    prop2.setProperty("user", "ylzx")
+    prop2.setProperty("password", "ylzx")
+    //清空SPEC_LOG_RECOM表
+    alsRecommend.truncateMysql("jdbc:mysql://192.168.37.102:3306/ylzx", "ylzx", "ylzx", "SPEC_LOG_RECOM")
+    //将结果保存到数据框中
+    content_df5.write.mode("append").jdbc(url2, "SPEC_LOG_RECOM", prop2) //overwrite or append
 
 
     sc.stop()

@@ -134,10 +134,10 @@ info: id => urlID
     val docsimiRDD = getDocsimiData(docsimiTable, sc)
     val docsimiDS = spark.createDataset(docsimiRDD)
 
-    val df2 = docsimiDS.select("id", "simsID", "level")
+    val df2 = docsimiDS.select("id", "simsID", "level").withColumn("score", $"level" * (-1) + 6 ).drop("level")
 
     val df3 = df1.join(df2, df1("itemString") === df2("id"), "left").
-      withColumn("rating", col("value") * col("level")).drop("value").drop("level").na.drop()
+      withColumn("rating", col("value") * col("score")).drop("value").drop("score").na.drop()
 
 
     val df4 = df3.drop("itemString").drop("id").withColumnRenamed("simsID", "itemString").

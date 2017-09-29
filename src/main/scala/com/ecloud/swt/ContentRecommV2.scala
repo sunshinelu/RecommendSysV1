@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat
 import java.util.{Calendar, Date, Properties}
 
 import com.ecloud.Inglory.RatingSys.UtilTool
-import com.ecloud.swt.ContentRecomm.logsSchema
 import org.ansj.app.keyword.KeyWordComputer
 import org.ansj.splitWord.analysis.ToAnalysis
 import org.apache.hadoop.hbase.HBaseConfiguration
@@ -14,7 +13,7 @@ import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
 import org.apache.hadoop.hbase.util.{Base64, Bytes}
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.ml.feature.{StringIndexer, HashingTF, IDF, MinHashLSH}
+import org.apache.spark.ml.feature.{HashingTF, IDF, MinHashLSH, StringIndexer}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
@@ -24,6 +23,15 @@ import org.apache.spark.{SparkConf, SparkContext}
 /**
   * Created by sunlu on 17/9/22.
   * 使用标题和5个关键词计算文章相似性
+spark-submit \
+--class com.ecloud.swt.ContentRecommV2 \
+--master yarn \
+--num-executors 4 \
+--executor-cores  2 \
+--executor-memory 4g \
+--jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
+/root/lulu/Progect/ylzx/RecommendSysV1.jar \
+yilan-total-analysis_webpage SPEC_LOG_CLICK
   */
 
 object ContentRecommV2 {
@@ -166,7 +174,7 @@ object ContentRecommV2 {
    1. bulid spark environment
     */
 
-    val sparkConf = new SparkConf().setAppName(s"ylzx_xgwz_DocsimiTitle") //.setMaster("local[*]").set("spark.executor.memory", "2g")
+    val sparkConf = new SparkConf().setAppName(s"swt_recommend_ContentRecommV2") //.setMaster("local[*]").set("spark.executor.memory", "2g")
     val spark = SparkSession.builder().config(sparkConf).getOrCreate()
     val sc = spark.sparkContext
     import spark.implicits._
@@ -304,7 +312,7 @@ object ContentRecommV2 {
     //清空SPEC_LOG_RECOM表
     alsRecommend.truncateMysql("jdbc:mysql://192.168.37.102:3306/ylzx", "ylzx", "ylzx", "SPEC_LOG_RECOM")
     //将结果保存到数据框中
-    content_df5.write.mode("append").jdbc(url2, "SPEC_LOG_RECOM", prop2) //overwrite or append
+    content_df5.coalesce(1).write.mode("append").jdbc(url2, "SPEC_LOG_RECOM", prop2) //overwrite or append
 
 
     sc.stop()

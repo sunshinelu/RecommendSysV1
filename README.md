@@ -915,3 +915,36 @@ count 't_hbaseSink'
 count 'yilan-total-analysis_webpage'
 
 => 192177
+
+时间：2017年09月30日
+
+slave6上vi ylzx_xgwz.sh
+
+
+#!/bin/bash
+#name=$1
+
+set -x
+source /root/.bashrc
+cd /root/software/spark-2.1.0-bin-hadoop2.6/bin
+
+spark-submit \
+--class com.ecloud.Inglory.DocsSimilarity.DocsimiTitleV2 \
+--master yarn \
+--num-executors 8 \
+--executor-cores 4 \
+--executor-memory 6g \
+--conf spark.default.parallelism=150 \
+--conf spark.storage.memoryFraction=0.5 \
+--conf spark.shuffle.memoryFraction=0.4 \
+--jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
+/root/lulu/Progect/ylzx/RecommendSysV1.jar \
+yilan-total-analysis_webpage ylzx_xgwz
+
+使用Jaccard Distance计算近一月数据与近一年数据之间的相似性。
+
+count 'ylzx_xgwz'
+
+=> 888166
+
+=> 906207

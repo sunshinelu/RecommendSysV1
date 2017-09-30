@@ -23,6 +23,20 @@ import org.apache.spark.sql.functions._
  * 使用文章标题和5个关键词计算文章之间的相似性
  * 计算近一月的文章和近一年文章之间的文章相似性
  * 使用算法为：Jaccard Distance
+ *
+spark-submit \
+--class com.ecloud.Inglory.DocsSimilarity.DocsimiTitleV2 \
+--master yarn \
+--num-executors 8 \
+--executor-cores 4 \
+--executor-memory 6g \
+--conf spark.default.parallelism=150 \
+--conf spark.storage.memoryFraction=0.5 \
+--conf spark.shuffle.memoryFraction=0.4 \
+--jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
+/root/lulu/Progect/ylzx/RecommendSysV1.jar \
+yilan-total-analysis_webpage ylzx_xgwz
+ *
  */
 object DocsimiTitleV2 {
 

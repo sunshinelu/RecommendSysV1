@@ -26,6 +26,7 @@ object DocsimiUtil extends Serializable{
     Base64.encodeBytes(proto.toByteArray)
   }
   case class YlzxSchema(itemString: String, title: String, manuallabel: String, time: String,timeL:Long, websitename: String, content: String)
+  case class YlzxSchema2(itemString: String, title: String, manuallabel: String, time: String,timeL:Long, websitename: String, content: String, columnId: String)
 
   case class LogView(CREATE_BY_ID: String, CREATE_TIME: Long, REQUEST_URI: String, PARAMS: String)
 

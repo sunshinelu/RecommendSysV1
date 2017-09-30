@@ -22,7 +22,10 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * Created by sunlu on 17/9/22.
+ * 根据标题、时间、栏目ID对数据进行除重
   * 使用标题和5个关键词计算文章相似性
+ * 只计算用户访问的文章与近一年文章的文章相似性
+ *
 spark-submit \
 --class com.ecloud.swt.ContentRecommV2 \
 --master yarn \
@@ -46,7 +49,7 @@ object ContentRecommV2 {
     val proto = ProtobufUtil.toScan(scan)
     Base64.encodeBytes(proto.toByteArray)
   }
-  case class ylzxSchema(itemString: String, title: String, content: String, manuallabel: String, time: Long)
+  case class ylzxSchema(itemString: String, title: String, content: String, manuallabel: String, time: Long, columnId: String)
 
   def getYlzxRDD(ylzxTable: String, year: Int, sc: SparkContext): RDD[ylzxSchema] = {
 
@@ -87,6 +90,7 @@ object ContentRecommV2 {
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("c")) //content
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("manuallabel")) //label
     scan.addColumn(Bytes.toBytes("f"), Bytes.toBytes("mod")) //time
+    scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("column_id"))
     conf.set(TableInputFormat.SCAN, convertScanToString(scan))
 
     val hBaseRDD = sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
@@ -99,9 +103,10 @@ object ContentRecommV2 {
       val content = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("c")) // 内容列
       val manuallabel = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("manuallabel")) //标签列
       val time = v.getValue(Bytes.toBytes("f"), Bytes.toBytes("mod")) //时间列
-      (urlID, title, content, manuallabel, time)
+      val column_id = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("column_id"))
+      (urlID, title, content, manuallabel, time, column_id)
     }
-    }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5).
+    }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5 & null != x._6).
       map { x => {
         val urlID_1 = Bytes.toString(x._1)
         val title_1 = Bytes.toString(x._2)
@@ -114,7 +119,8 @@ object ContentRecommV2 {
         val manuallabel_1 = Bytes.toString(x._4)
         //时间格式转化
         val time = Bytes.toLong(x._5)
-        ylzxSchema(urlID_1, title_1, content_1, manuallabel_1, time)
+        val column_id = Bytes.toString(x._6)
+        ylzxSchema(urlID_1, title_1, content_1, manuallabel_1, time, column_id)
       }
       }.filter(x => {
       x.title.length >= 2
@@ -193,7 +199,7 @@ object ContentRecommV2 {
      */
 
     val ylzxRDD = getYlzxRDD(ylzxTable, 1, sc)
-    val ylzxDS = spark.createDataset(ylzxRDD)
+    val ylzxDS = spark.createDataset(ylzxRDD).dropDuplicates(Array("title","time","columnId"))
 
     val logsRDD = getLogsRDD(logsTable, spark, sc)
     val logsDS = spark.createDataset(logsRDD).na.drop(Array("userString")).
@@ -202,8 +208,9 @@ object ContentRecommV2 {
       agg(sum("value")).withColumnRenamed("sum(value)", "rating")
 
     /*
-       3. string to number
+       3. get doc id
         */
+    val docId = logsDS2.select("itemString").dropDuplicates()
 
     val itemId = new StringIndexer().setInputCol("itemString").setOutputCol("itemID").fit(ylzxDS)
     val itemIdDf = itemId.transform(ylzxDS)
@@ -265,7 +272,8 @@ object ContentRecommV2 {
 
     // Feature Transformation
     val mhTransformed = mhModel.transform(tfidfData)
-    val docsimi_mh = mhModel.approxSimilarityJoin(mhTransformed, mhTransformed, 1.0)
+    val docIdDf = docId.join(mhTransformed, Seq("itemString"), "left").na.drop()
+    val docsimi_mh = mhModel.approxSimilarityJoin(docIdDf, mhTransformed, 1.0)
 
     //  case class ylzxSchema(itemString: String, title: String, content: String, manuallabel: String, time: Long)
 // case class logsSchema(operatorId: String, userString: String, itemString: String, accessTime: String, accessTimeL: Long, value: Double)

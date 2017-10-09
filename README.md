@@ -948,3 +948,23 @@ count 'ylzx_xgwz'
 => 888166
 
 => 906207
+
+
+
+时间：2017年10月09日
+
+count 't_hbaseSink'
+
+=> 4111385
+
+=> 4111442
+
+count 'ylzx_xgwz'
+
+=> 925614
+
+=> 926490
+
+count 'yilan-total-analysis_webpage'
+
+=> 199212

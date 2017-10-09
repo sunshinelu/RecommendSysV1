@@ -142,8 +142,8 @@ object CheckTotalTable {
     val ylzxTable = "yilan-total-analysis_webpage"
 
     val ylzxRDD = getYlzxSegYRDD(ylzxTable, 1, sc)
-    val ylzxDS = spark.createDataset(ylzxRDD).drop("segWords").select("title")
-    ylzxDS.show(5,false)
+    val ylzxDS = spark.createDataset(ylzxRDD).drop("segWords").select("title","time")
+    ylzxDS.sort($"time".desc).show(5,false)
 //    println("ylzxDS is: " + ylzxDS.count())
 
 

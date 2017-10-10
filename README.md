@@ -968,3 +968,12 @@ count 'ylzx_xgwz'
 count 'yilan-total-analysis_webpage'
 
 => 199212
+
+
+时间：2017年10月10日
+
+count 'ylzx_xgwz'
+
+=> 926821
+
+=> 933493

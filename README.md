@@ -977,3 +977,50 @@ count 'ylzx_xgwz'
 => 926821
 
 => 933493
+
+
+时间：2017年10月11日
+
+count 'ylzx_xgwz'
+
+=> 939308
+
+=> 939468
+
+spark-submit \
+--class com.ecloud.Inglory.DocsSimilarity.DocsimiTitleV4 \
+--master yarn \
+--deploy-mode client \
+--num-executors 4 \
+--executor-cores 4 \
+--executor-memory 4g \
+/root/lulu/Progect/ylzx/RecommendSysV1-1.0-SNAPSHOT-jar-with-dependencies.jar \
+yilan-total-analysis_webpage ylzx_xgwz ylzx_xgwz_temp
+
+count 'ylzx_xgwz'
+
+=> 939493
+
+=> 939498
+
+---------------------
+需求：
+ 
+1、对所有用户当天/前天阅读的文章分别进行关键词提取，根据词性进行过滤，只保留名词。
+每篇文章至多保存5个关键词，然后对关键词进行wordcount，取top 50～100.
+
+2、对所有用户当天/前天阅读的文章所在的行政区划（p:xzqhname）进行wordcount。
+
+
+最终结果为：
+主键、时间（年月日）、关键词（词：权重；词：权重）、区域（行政编号a：权重；行政编号b：权重）、创建时间（年月日时分秒）
+
+
+待办事项：
+分词词库（统一维护）
+停用词词库（统一维护）
+
+
+
+
+-----------------

@@ -50,6 +50,8 @@ crontab -u root -e
 
 0 22 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_cnxh.sh
 
+0 3 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_tj_mt_yhxw.sh
+
 4.重新启动服务
 service crond restart
 

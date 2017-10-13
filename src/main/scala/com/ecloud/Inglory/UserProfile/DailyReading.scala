@@ -7,7 +7,6 @@ import org.ansj.app.keyword.KeyWordComputer
 import org.ansj.library.UserDefineLibrary
 import org.ansj.recognition.NatureRecognition
 import org.ansj.splitWord.analysis.ToAnalysis
-import org.ansj.util.MyStaticValue
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
@@ -33,6 +32,32 @@ import org.apache.spark.{SparkConf, SparkContext}
  * 测试：
  * spark-shell --master yarn --num-executors 4 --executor-cores  2 --executor-memory 4g --jars /root/software/extraClass/solr-solrj-5.1.0.jar,/root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar
  *
+ *
+ * CREATE TABLE `YLZX_TJ_MT_YHXW` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `RMCTJ` text COMMENT '热门词统计前50',
+  `XZQHTJ` text COMMENT '行政区划统计前二十',
+  `WZLBTJ` text COMMENT '网站类别统计前十',
+  `WZTJ` varchar(255) DEFAULT NULL COMMENT '用户访问的前十网站',
+  `SSSJ`：时间,
+  `CJSJ` varchar(19) DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='每一天所有用户的用户行为统计表';
+ *
+任务运行命令：
+
+spark-submit \
+--class com.ecloud.Inglory.UserProfile.DailyReading \
+--master yarn \
+--num-executors 4 \
+--executor-cores 2 \
+--executor-memory 4g \
+--jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
+/root/lulu/Progect/ylzx/RecommendSysV1.jar \
+yilan-total-analysis_webpage t_hbaseSink
+
+ *
+ *
  */
 object DailyReading {
 
@@ -48,7 +73,7 @@ object DailyReading {
     Logger.getRootLogger().setLevel(Level.OFF)
   }
 
-  case class DailyReadingSchema(time:String, keywordsList:String,distList:String)
+  case class DailyReadingSchema(SSSJ:String, RMCTJ:String,XZQHTJ:String)//time:String, keywordsList:String,distList:String
 
   def getNDaysAgo(timeFormat:String,N:Int): String = {
     // 获取时间
@@ -228,7 +253,7 @@ object DailyReading {
     1. bulid spark environment
      */
 
-    val sparkConf = new SparkConf().setAppName(s"DailyReading") //.setMaster("local[*]").set("spark.executor.memory", "2g")
+    val sparkConf = new SparkConf().setAppName(s"DailyReading_YLZX_TJ_MT_YHXW") //.setMaster("local[*]").set("spark.executor.memory", "2g")
     val spark = SparkSession.builder().config(sparkConf).getOrCreate()
     val sc = spark.sparkContext
     import spark.implicits._
@@ -245,6 +270,7 @@ object DailyReading {
         val logsTable = "t_hbaseSink"
     */
 
+    // 加载词典
     val userDefineFile= "/personal/sunlu/ylzx/userDefine.dic"
     val userDefineList = sc.textFile(userDefineFile).collect().toList
     userDefineList.foreach(x => {
@@ -340,7 +366,9 @@ object DailyReading {
       filter($"nature".contains("n")).
       withColumn("rn", row_number.over(w1)).filter($"rn" <= 50).drop("rn")
 
-    val distDF = df5.groupBy("dist").agg(sum($"value")).withColumnRenamed("sum(value)", "v")
+    val w2 = Window.partitionBy($"dist").orderBy($"v".desc)
+    val distDF = df5.groupBy("dist").agg(sum($"value")).withColumnRenamed("sum(value)", "v").
+      withColumn("rn", row_number.over(w2)).filter($"rn" <= 20).drop("rn")
 
 
     /*
@@ -358,7 +386,7 @@ object DailyReading {
       orderBy($"vScaled".desc)
 
 //    keywordsDF2.filter($"words".contains("济南")).show(false)
-    keywordsDF2.filter($"words".contains("数据")).show(false)
+//    keywordsDF2.filter($"words".contains("数据")).show(false)
 
     val (dMin, dMax) = distDF.agg(min($"v"), max($"v")).first match {
       case Row(x: Double, y: Double) => (x, y)
@@ -383,12 +411,12 @@ object DailyReading {
     val yesterday = getNDaysAgo("yyyy-MM-dd", 1)
 
     val resultDF = spark.createDataset(sc.parallelize(Seq(DailyReadingSchema(yesterday,keyworsString,distString)))).
-      withColumn("creatTime", current_timestamp()).withColumn("creatTime", date_format($"creatTime", "yyyy-MM-dd HH:mm:ss"))
+      withColumn("CJSJ", current_timestamp()).withColumn("CJSJ", date_format($"CJSJ", "yyyy-MM-dd HH:mm:ss"))
 
 
 
     //将joinedDf保存到result表中
-    val resultTable = ""
+    val resultTable = "YLZX_TJ_MT_YHXW"
     val url2 = "jdbc:mysql://192.168.37.102:3306/ylzx?useUnicode=true&characterEncoding=UTF-8"
     //使用"?useUnicode=true&characterEncoding=UTF-8"以防止出现存入MySQL数据库中中文乱码情况
     val prop2 = new Properties()

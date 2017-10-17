@@ -138,6 +138,8 @@ object DocsimiUtil extends Serializable{
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //websitename
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("c")) //content
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("column_id")) //column_id
+    scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("sfzs")) //sfzs是否展示：1表示展示，0表示不展示
+    scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("sfcj")) //sfcj是否采集：1表示重复采集，0表示未重复采集
     conf.set(TableInputFormat.SCAN, convertScanToString(scan))
 
     val hBaseRDD = sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
@@ -152,7 +154,9 @@ object DocsimiUtil extends Serializable{
       val webName = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //websitename列
       val content = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("c")) //content列
       val column_id = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("column_id")) // column_id列
-      (urlID, title, manuallabel, time, webName, content, column_id)
+      val sfzs = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("sfzs")) //sfzs
+      val sfcj = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("sfcj")) //sfcj
+      (urlID, title, manuallabel, time, webName, content, column_id, sfzs, sfcj)
     }
     }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5 & null != x._6).
       map { x => {
@@ -165,11 +169,12 @@ object DocsimiUtil extends Serializable{
         val websitename_1 = if (null != x._5) Bytes.toString(x._5) else ""
         val content_1 = Bytes.toString(x._6)
         val column_id = if (null != x._7) Bytes.toString(x._7) else ""
-        (urlID_1, title_1, manuallabel_1, time, websitename_1, content_1, column_id)
+        val sfzs = if (null != x._8) Bytes.toString(x._8) else ""
+        val sfcj = if (null != x._9) Bytes.toString(x._9) else ""
+        (urlID_1, title_1, manuallabel_1, time, websitename_1, content_1, column_id, sfzs, sfcj)
       }
-      }.filter(x => {
-      x._2.length >= 2
-    }).filter(x => x._4 >= nDaysAgoL).map(x => {//x._4 <= todayL &
+      }.filter(_._2.length >= 2).filter(_._8 != "0").filter(_._9 != "1").
+      filter(x => x._4 >= nDaysAgoL).map(x => {//x._4 <= todayL &
       val date: Date = new Date(x._4)
       val time = dateFormat.format(date)
       val content = x._6.replace("&nbsp;", "").replaceAll("\\uFFFD", "").replaceAll("([\\ud800-\\udbff\\udc00-\\udfff])", "")
@@ -316,6 +321,8 @@ object DocsimiUtil extends Serializable{
     scan.addColumn(Bytes.toBytes("f"), Bytes.toBytes("mod")) //time
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //
    // scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("appc"))
+    scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("sfzs")) //sfzs是否展示：1表示展示，0表示不展示
+    scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("sfcj")) //sfcj是否采集：1表示重复采集，0表示未重复采集
 
     // scan.setTimeRange(1400468400000L, 1400472000000L)
     conf.set(TableInputFormat.SCAN, convertScanToString(scan))
@@ -331,7 +338,9 @@ object DocsimiUtil extends Serializable{
       val time = v.getValue(Bytes.toBytes("f"), Bytes.toBytes("mod")) //时间列
       val webName = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //网站名列
      // val appc = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("appc")) //appc
-      (urlID, title, content, label, time, webName)
+      val sfzs = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("sfzs")) //sfzs
+      val sfcj = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("sfcj")) //sfcj
+      (urlID, title, content, label, time, webName, sfzs, sfcj)
     }
     }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5 & null != x._6).
       map { x => {
@@ -342,10 +351,13 @@ object DocsimiUtil extends Serializable{
         //时间格式转化
         val time_1 = Bytes.toLong(x._5)
         val websitename_1 = Bytes.toString(x._6)
-
-        (urlID_1, title_1, content_1, label_1, time_1, websitename_1)
+        val sfzs = if (null != x._7) Bytes.toString(x._7) else ""
+        val sfcj = if (null != x._8) Bytes.toString(x._8) else ""
+        (urlID_1, title_1, content_1, label_1, time_1, websitename_1, sfzs, sfcj)
       }
-      }.filter(x => x._2.length > 1 & x._3.length > 50).filter(x => x._5 <= todayL & x._5 >= nDaysAgoL).
+      }.filter(x => x._2.length > 1 & x._3.length > 50).
+      filter(x => x._5 >= nDaysAgoL).
+      filter(_._7 != "0").filter(_._8 != "1").
       map(x => {
         val date: Date = new Date(x._5)
         val time = dateFormat.format(date)

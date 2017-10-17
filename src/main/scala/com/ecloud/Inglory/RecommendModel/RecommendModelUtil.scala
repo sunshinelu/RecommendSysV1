@@ -59,6 +59,8 @@ object RecommendModelUtil {
     scan.addColumn(Bytes.toBytes("f"), Bytes.toBytes("mod")) //time
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //websitename
     scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("c")) //content
+    scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("sfzs")) //sfzs是否展示：1表示展示，0表示不展示
+    scan.addColumn(Bytes.toBytes("p"), Bytes.toBytes("sfcj")) //sfcj是否采集：1表示重复采集，0表示未重复采集
     conf.set(TableInputFormat.SCAN, convertScanToString(scan))
 
     val hBaseRDD = sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
@@ -72,7 +74,9 @@ object RecommendModelUtil {
       val time = v.getValue(Bytes.toBytes("f"), Bytes.toBytes("mod")) //时间列
       val webName = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("websitename")) //websitename列
       val content = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("c")) //content列
-      (urlID, title, manuallabel, time, webName, content)
+      val sfzs = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("sfzs")) //sfzs
+      val sfcj = v.getValue(Bytes.toBytes("p"), Bytes.toBytes("sfcj")) //sfcj
+      (urlID, title, manuallabel, time, webName, content, sfzs, sfcj)
     }
     }.filter(x => null != x._2 & null != x._3 & null != x._4 & null != x._5 & null != x._6).
       map { x => {
@@ -81,14 +85,16 @@ object RecommendModelUtil {
         val manuallabel_1 = if (null != x._3) Bytes.toString(x._3) else ""
         //时间格式转化
         val time = Bytes.toLong(x._4)
-
         val websitename_1 = if (null != x._5) Bytes.toString(x._5) else ""
         val content_1 = Bytes.toString(x._6)
-        (urlID_1, title_1, manuallabel_1, time, websitename_1, content_1)
+
+        val sfzs = if (null != x._7) Bytes.toString(x._7) else ""
+        val sfcj = if (null != x._8) Bytes.toString(x._8) else ""
+
+        (urlID_1, title_1, manuallabel_1, time, websitename_1, content_1, sfzs, sfcj)
       }
-      }.filter(x => {
-      x._2.length >= 2
-    }).filter(x => x._4 <= todayL & x._4 >= nDaysAgoL).map(x => {
+      }.filter(_._2.length >= 2).filter(_._7 != "0").filter(_._8 != "1").
+      filter(x => x._4 <= todayL & x._4 >= nDaysAgoL).map(x => {
       val date: Date = new Date(x._4)
       val time = dateFormat.format(date)
       val content = x._6.replace("&nbsp;", "").replaceAll("\\uFFFD", "").replaceAll("([\\ud800-\\udbff\\udc00-\\udfff])", "")

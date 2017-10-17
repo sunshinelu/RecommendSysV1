@@ -18,6 +18,7 @@ import org.apache.spark.sql.functions._
 
 /**
   * Created by sunlu on 17/9/22.
+ * 计算近一年数据的相似性
   */
 object DocsimiTitle {
 

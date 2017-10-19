@@ -1,0 +1,33 @@
+<!--Mon Jun 15 14:43:41 2015-->
+<configuration>
+
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+    <property>
+        <name>mapred.remote.os</name>
+        <value>Linux</value>
+    </property>
+    <property>
+        <name>mapreduce.app-submission.cross-platform</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>mapreduce.application.classpath</name>
+        <value>
+            <!-- /etc/hadoop/conf, -->
+            /usr/hdp/2.2.4.2-2,
+            /usr/hdp/2.2.4.2-2/hadoop/*,
+            /usr/hdp/2.2.4.2-2/hadoop/lib/*,
+            /usr/hdp/2.2.4.2-2/hadoop-hdfs/*,
+            /usr/hdp/2.2.4.2-2/hadoop-hdfs/lib/*,
+            /usr/hdp/2.2.4.2-2/hadoop-mapreduce/*,
+            /usr/hdp/2.2.4.2-2/hadoop-mapreduce/lib/*,
+            /usr/hdp/2.2.4.2-2/hadoop-yarn/*,
+            /usr/hdp/2.2.4.2-2/hadoop-yarn/lib/*
+        </value>
+    </property>
+
+
+</configuration>

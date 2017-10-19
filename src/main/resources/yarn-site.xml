@@ -1,0 +1,34 @@
+<!--Mon Jun 15 14:43:37 2015-->
+<configuration>
+
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.address</name>
+        <value>bigdata2.yiyun:8050</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.scheduler.address</name>
+        <value>bigdata2.yiyun:8030</value>
+    </property>
+
+    <property>
+        <name>yarn.application.classpath</name>
+        <value>
+            /usr/hdp/2.2.4.2-2,
+            /usr/hdp/2.2.4.2-2/hadoop/*,
+            /usr/hdp/2.2.4.2-2/hadoop/lib/*,
+            /usr/hdp/2.2.4.2-2/hadoop-hdfs/*,
+            /usr/hdp/2.2.4.2-2/hadoop-hdfs/lib/*,
+            /usr/hdp/2.2.4.2-2/hadoop-mapreduce/*,
+            /usr/hdp/2.2.4.2-2/hadoop-mapreduce/lib/*,
+            /usr/hdp/2.2.4.2-2/hadoop-yarn/*,
+            /usr/hdp/2.2.4.2-2/hadoop-yarn/lib/*
+        </value>
+    </property>
+
+
+</configuration>

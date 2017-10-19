@@ -190,7 +190,7 @@ object DocsimiTitleV5 {
      */
     val year = args(4).toInt
     val ylzxRDD = DocsimiUtil.getYlzxYRDD2(ylzxTable, year, sc)
-    val ylzxDS = spark.createDataset(ylzxRDD).//dropDuplicates(Array("title", "time", "columnId")).
+    val ylzxDS = spark.createDataset(ylzxRDD).dropDuplicates(Array("title", "time", "columnId")).
       drop("columnId")
 
     //    ylzxDS.filter($"title".contains("浙江瓯海国税")).select("itemString","title").show(false)

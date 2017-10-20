@@ -259,7 +259,7 @@ object DocsimiTitleV4 {
 
     val mhSimiDF = docsimi_mh.select("datasetA.itemString", "datasetB.itemString", "datasetB.title",
       "datasetB.manuallabel", "datasetB.websitename", "datasetB.time", "distCol").toDF(colRenamed: _*).
-      filter($"doc1" =!= $"doc2")
+      filter($"doc1" =!= $"doc2").filter($"distCol" >= 0.01)
 
     //对dataframe进行分组排序，并取每组的前5个
     val w = Window.partitionBy("doc1").orderBy(col("distCol").asc)

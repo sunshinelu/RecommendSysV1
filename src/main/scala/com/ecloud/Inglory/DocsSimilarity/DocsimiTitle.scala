@@ -103,7 +103,7 @@ using Jaccard Distance calculate doc-doc similarity
 
     val mhSimiDF = docsimi_mh.select("datasetA.id", "datasetA.urlID", "datasetB.id", "datasetB.urlID", "datasetB.title",
       "datasetB.label", "datasetB.websitename", "datasetB.time", "distCol").toDF(colRenamed: _*).
-      filter($"doc1Id" =!= $"doc2Id")
+      filter($"doc1Id" =!= $"doc2Id").filter($"distCol" >= 0.01)
 
     //对dataframe进行分组排序，并取每组的前5个
     val w = Window.partitionBy("doc1Id").orderBy(col("distCol").asc)

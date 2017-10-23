@@ -1037,3 +1037,11 @@ count 't_hbaseSink'
 
 p:sfzs != 0 （是否展示，1表示展示，0表示不展示）
 p:sfcj != 1 （是否采集，1表示重复采集，0表示未重复采集）
+
+时间：2017年10月23日
+
+在DocsimiTitleV5中添加：
+
+MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171023.txt"// bigdata7路径
+
+字典数量为：11906305个

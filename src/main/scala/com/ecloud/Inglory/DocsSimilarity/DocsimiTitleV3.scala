@@ -6,6 +6,7 @@ import java.util.{Calendar, Date}
 import org.ansj.app.keyword.KeyWordComputer
 import org.ansj.library.UserDefineLibrary
 import org.ansj.splitWord.analysis.ToAnalysis
+import org.ansj.util.MyStaticValue
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat
@@ -58,6 +59,7 @@ object DocsimiTitleV3 {
     userDefineList.foreach(x => {
       UserDefineLibrary.insertWord(x, "userDefine", 1000)
     })
+    MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171023.txt"// bigdata7路径
 
     /*
 2. 获取一个月前的时间

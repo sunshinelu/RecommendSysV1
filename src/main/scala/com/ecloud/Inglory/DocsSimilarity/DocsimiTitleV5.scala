@@ -7,6 +7,7 @@ import com.ecloud.Inglory.Solr.AddIndex
 import org.ansj.app.keyword.KeyWordComputer
 import org.ansj.library.UserDefineLibrary
 import org.ansj.splitWord.analysis.ToAnalysis
+import org.ansj.util.MyStaticValue
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.client.{HBaseAdmin, Put, ResultScanner}
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
@@ -162,6 +163,7 @@ object DocsimiTitleV5 {
     userDefineList.foreach(x => {
       UserDefineLibrary.insertWord(x, "userDefine", 1000)
     })
+    MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171023.txt"// bigdata7路径
 
     /*
 2. 获取7天前的时间

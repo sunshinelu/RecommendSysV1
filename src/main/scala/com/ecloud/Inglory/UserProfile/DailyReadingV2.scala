@@ -8,6 +8,7 @@ import org.ansj.app.keyword.KeyWordComputer
 import org.ansj.library.UserDefineLibrary
 import org.ansj.recognition.NatureRecognition
 import org.ansj.splitWord.analysis.ToAnalysis
+import org.ansj.util.MyStaticValue
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
@@ -243,6 +244,7 @@ object DailyReadingV2 {
     userDefineList.foreach(x => {
       UserDefineLibrary.insertWord(x, "userDefine", 1000)
     })
+    MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171023.txt"// bigdata7路径
 
     // 获取日志数据
     val logsRDD = getDailyLogsRDD(logsTable, sc)

@@ -95,7 +95,7 @@ object contentModelV3 {
   def main(args: Array[String]) {
     SetLogger
 
-    val sparkConf = new SparkConf().setAppName(s"contentModelV2") //.setMaster("local[*]").set("spark.executor.memory", "2g")
+    val sparkConf = new SparkConf().setAppName(s"contentModelV3") //.setMaster("local[*]").set("spark.executor.memory", "2g")
     val spark = SparkSession.builder().config(sparkConf).getOrCreate()
     val sc = spark.sparkContext
     import spark.implicits._

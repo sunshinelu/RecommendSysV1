@@ -1046,6 +1046,14 @@ MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171023.txt"// bigd
 
 字典数量为：11906305个
 
-将userDic_20171023.txt中的拼音替换成空
+时间：2017年10月16日
 
-userDic_20171024.txt
+将userDic_20171023.txt中的拼音替换成空，空格替换成空。
+
+userDic_20171024.txt中字典数量为：11424791个
+
+
+count 't_hbaseSink'
+
+=> 4202899
+=> 4203007

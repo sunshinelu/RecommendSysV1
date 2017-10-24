@@ -131,9 +131,10 @@ object contentModelV4 {
     val docsimiDS = spark.createDataset(docsimiRDD)//.filter($"simsScore" <= 0.9) //.drop("simsScore")
 
     //使用info:simsScore列作为权重，代替info:level列。
-    val df2 = docsimiDS.select("id", "simsID", "simsScore").withColumn("score", bround($"simsScore" * (-1) + 1, 3)).
+    val df2 = docsimiDS.select("id", "simsID", "simsScore").withColumn("score", bround(($"simsScore" * (-1) + 1) * 5, 3)).
       drop("simsScore")
 
+    // 关于score和value的权重问题
     val df3 = df1.join(df2, df1("itemString") === df2("id"), "left").
       withColumn("rating", col("value") * col("score")).drop("value").drop("score").na.drop()
 

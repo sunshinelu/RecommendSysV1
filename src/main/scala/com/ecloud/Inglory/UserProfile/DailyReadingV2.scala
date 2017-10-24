@@ -1,9 +1,8 @@
 package com.ecloud.Inglory.UserProfile
 
 import java.text.SimpleDateFormat
-import java.util.{Properties, Calendar, Date}
+import java.util.{Calendar, Date, Properties}
 
-import com.ecloud.Inglory.UserProfile.DailyReading.{DailyReadingSchema, DailyYlzxSchema, LogView2, LogView}
 import org.ansj.app.keyword.KeyWordComputer
 import org.ansj.library.UserDefineLibrary
 import org.ansj.recognition.NatureRecognition
@@ -13,13 +12,13 @@ import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
-import org.apache.hadoop.hbase.util.{Bytes, Base64}
+import org.apache.hadoop.hbase.util.{Base64, Bytes}
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.rdd.RDD
 
 /**
  * Created by sunlu on 17/10/16.
@@ -244,7 +243,7 @@ object DailyReadingV2 {
     userDefineList.foreach(x => {
       UserDefineLibrary.insertWord(x, "userDefine", 1000)
     })
-    MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171023.txt"// bigdata7路径
+    MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171024.txt"// bigdata7路径
 
     // 获取日志数据
     val logsRDD = getDailyLogsRDD(logsTable, sc)
@@ -353,13 +352,13 @@ object DailyReadingV2 {
     val distDF2 = distDF.withColumn("vScaled", bround(log($"v"), 3)).
       orderBy($"vScaled".desc)
 
-    val keyworsString = keywordsDF2.select("words","vScaled").rdd.map{case Row(word:String,weight:Double) => (word, weight)}.map(x =>
+    val keyworsString = keywordsDF2.select("words","vScaled").na.drop.rdd.map{case Row(word:String,weight:Double) => (word, weight)}.map(x =>
     {
       val result = x._1 + ":" + x._2.toString
       (result)
     }).collect().mkString(";")
 
-    val distString = distDF2.select("dist","vScaled").rdd.map{case Row(dist:String,weight:Double) => (dist, weight)}.map(x =>
+    val distString = distDF2.select("dist","vScaled").na.drop.rdd.map{case Row(dist:String,weight:Double) => (dist, weight)}.map(x =>
     {
       val result = x._1 + ":" + x._2.toString
       (result)

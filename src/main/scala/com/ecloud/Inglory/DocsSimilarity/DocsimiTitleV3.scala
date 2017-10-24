@@ -59,7 +59,7 @@ object DocsimiTitleV3 {
     userDefineList.foreach(x => {
       UserDefineLibrary.insertWord(x, "userDefine", 1000)
     })
-    MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171023.txt"// bigdata7路径
+    MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171024.txt"// bigdata7路径
 
     /*
 2. 获取一个月前的时间

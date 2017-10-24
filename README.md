@@ -1045,3 +1045,7 @@ p:sfcj != 1 （是否采集，1表示重复采集，0表示未重复采集）
 MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171023.txt"// bigdata7路径
 
 字典数量为：11906305个
+
+将userDic_20171023.txt中的拼音替换成空
+
+userDic_20171024.txt

@@ -104,7 +104,7 @@ object RatingSysV4 {
         val content_1 = Bytes.toString(x._6)
         (urlID_1, title_1, manuallabel_1, time, websitename_1, content_1)
       }
-      }.filter(x => {x._2.length >= 2}).filter(x => x._4 <= todayL & x._4 >= nDaysAgoL).map(x => {
+      }.filter(x => {x._2.length >= 2}).filter(x => x._4 >= nDaysAgoL).map(x => {
       val date: Date = new Date(x._4)
       val time = dateFormat.format(date)
       val content = x._6.replace("&nbsp;", "").replaceAll("\\uFFFD", "").replaceAll("([\\ud800-\\udbff\\udc00-\\udfff])", "")

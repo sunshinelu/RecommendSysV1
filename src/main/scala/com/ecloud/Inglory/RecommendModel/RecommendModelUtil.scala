@@ -94,7 +94,7 @@ object RecommendModelUtil {
         (urlID_1, title_1, manuallabel_1, time, websitename_1, content_1, sfzs, sfcj)
       }
       }.filter(_._2.length >= 2).filter(_._7 != "0").filter(_._8 != "1").
-      filter(x => x._4 <= todayL & x._4 >= nDaysAgoL).map(x => {
+      filter(x => x._4 >= nDaysAgoL).map(x => {
       val date: Date = new Date(x._4)
       val time = dateFormat.format(date)
       val content = x._6.replace("&nbsp;", "").replaceAll("\\uFFFD", "").replaceAll("([\\ud800-\\udbff\\udc00-\\udfff])", "")

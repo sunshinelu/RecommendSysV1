@@ -143,7 +143,7 @@ object docSimilarity {
 
         (urlID_1, title_1, content_1, label_1, time_1, websitename_1)
       }
-      }.filter(x => x._2.length > 1 & x._3.length > 20).filter(x => x._5 <= todayL & x._5 >= nDaysAgoL).
+      }.filter(x => x._2.length > 1 & x._3.length > 20).filter(x => x._5 >= nDaysAgoL).
       map(x => {
         val date: Date = new Date(x._5)
         val time = dateFormat.format(date)

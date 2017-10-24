@@ -102,7 +102,7 @@ object RatingSysV3 {
         val websitename_1 = if(null != x._5) Bytes.toString(x._5) else ""
         (urlID_1, title_1, manuallabel_1, time, websitename_1)
       }
-      }.filter(x => {x._2.length >= 2}).filter(x => x._4 <= todayL & x._4 >= nDaysAgoL).map(x => {
+      }.filter(x => {x._2.length >= 2}).filter(x => x._4 >= nDaysAgoL).map(x => {
       val date: Date = new Date(x._4)
       val time = dateFormat.format(date)
       Schema(x._1, x._2, x._3, time, x._5)

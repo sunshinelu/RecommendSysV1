@@ -94,7 +94,7 @@ object DocsimiUtil extends Serializable{
       }
       }.filter(x => {
       x._2.length >= 2
-    }).filter(x => x._4 <= todayL & x._4 >= nDaysAgoL).map(x => {
+    }).filter(x => x._4 >= nDaysAgoL).map(x => {
       val date: Date = new Date(x._4)
       val time = dateFormat.format(date)
       val content = x._6.replace("&nbsp;", "").replaceAll("\\uFFFD", "").replaceAll("([\\ud800-\\udbff\\udc00-\\udfff])", "")
@@ -174,7 +174,7 @@ object DocsimiUtil extends Serializable{
         (urlID_1, title_1, manuallabel_1, time, websitename_1, content_1, column_id, sfzs, sfcj)
       }
       }.filter(_._2.length >= 2).filter(_._8 != "0").filter(_._9 != "1").
-      filter(x => x._4 >= nDaysAgoL).map(x => {//x._4 <= todayL &
+      filter(x => x._4 >= nDaysAgoL).map(x => {
       val date: Date = new Date(x._4)
       val time = dateFormat.format(date)
       val content = x._6.replace("&nbsp;", "").replaceAll("\\uFFFD", "").replaceAll("([\\ud800-\\udbff\\udc00-\\udfff])", "")
@@ -451,7 +451,7 @@ object DocsimiUtil extends Serializable{
 
         (urlID_1, title_1, content_1, label_1, time_1, websitename_1)
       }
-      }.filter(x => x._2.length > 1 & x._3.length > 50).filter(x => x._5 <= todayL & x._5 >= nDaysAgoL).
+      }.filter(x => x._2.length > 1 & x._3.length > 50).filter(x =>  x._5 >= nDaysAgoL).
       map(x => {
         val date: Date = new Date(x._5)
         val time = dateFormat.format(date)

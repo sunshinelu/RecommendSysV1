@@ -318,7 +318,7 @@ object appRecomV1 {
         (rowkey, title, time, content)
       }
       }.filter(x => {
-      x._2.length >= 2 && x._2.length >= 20 && x._3 <= todayL & x._3 >= nDaysAgoL
+      x._2.length >= 2 && x._2.length >= 20 && x._3 >= nDaysAgoL
     }).map(x => {
       val rowkey = x._1.toString
       val title = x._2.toString

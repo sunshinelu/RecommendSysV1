@@ -111,9 +111,10 @@ object contentModelV4 {
     val logsTable = args(1)
     val docsimiTable = args(2)
     /*
- val ylzxTable = "yilan-total_webpage"
+ val ylzxTable = "yilan-total-analysis_webpage"
  val logsTable = "t_hbaseSink"
- val docsimiTable = "docsimi_word2vec"
+ val docsimiTable = "ylzx_xgwz"
+  val outputTable = "ylzx_cnxh"
  */
     val outputTable = args(3)
 
@@ -145,12 +146,17 @@ object contentModelV4 {
 
     val df5 = df4.join(ylzxDS, Seq("itemString"), "left")
 
+    val myID = "175786f8-1e74-4d6c-94e9-366cf1649721"
+    df5.filter($"userString" === myID).show(false)
+    val item = "3d4b6608-01e5-4498-8e31-c1986f9a98af"
 
     // 根据userString进行分组，对打分进行倒序排序，获取打分前10的数据。
     val w = Window.partitionBy("userString").orderBy(col("rating").desc)
     val df6 = df5.withColumn("rn", row_number.over(w)).where($"rn" <= 9) //70
 
     val df7 = df6.select("userString", "itemString", "rating", "rn", "title", "manuallabel", "time")
+
+    df7.filter($"userString" === myID).show(false)
 
     val conf = HBaseConfiguration.create() //在HBaseConfiguration设置可以将扫描限制到部分列，以及限制扫描的时间范围
     //如果outputTable表存在，则删除表；如果不存在则新建表。

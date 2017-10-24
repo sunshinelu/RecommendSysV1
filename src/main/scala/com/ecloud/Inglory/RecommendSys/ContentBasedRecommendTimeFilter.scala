@@ -107,7 +107,7 @@ object ContentBasedRecommendTimeFilter {
         (rowkey_1, title_1, content_1, url_1, label_1, time_1, time_L)
       }
       }.filter(x => x._3.length > 0 & x._4.length > 0 & x._5.length > 0 & x._6.length > 0).
-      filter(x => x._7 <= todayL & x._7 >= nDaysAgoL)
+      filter(x => x._7 >= nDaysAgoL)
 
     val wordsUrlLab = hbaseRDD.map { x =>
       val corpus = ToAnalysis.parse(x._3).toArray.map(_.toString.split("/")).

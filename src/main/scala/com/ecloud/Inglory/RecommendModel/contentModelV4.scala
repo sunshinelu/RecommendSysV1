@@ -146,9 +146,12 @@ object contentModelV4 {
 
     val df5 = df4.join(ylzxDS, Seq("itemString"), "left")
 
+    /*
+    // test part
     val myID = "175786f8-1e74-4d6c-94e9-366cf1649721"
     df5.filter($"userString" === myID).show(false)
     val item = "3d4b6608-01e5-4498-8e31-c1986f9a98af"
+*/
 
     // 根据userString进行分组，对打分进行倒序排序，获取打分前10的数据。
     val w = Window.partitionBy("userString").orderBy(col("rating").desc)
@@ -156,8 +159,10 @@ object contentModelV4 {
 
     val df7 = df6.select("userString", "itemString", "rating", "rn", "title", "manuallabel", "time")
 
+    /*
+    // test part
     df7.filter($"userString" === myID).show(false)
-
+*/
     val conf = HBaseConfiguration.create() //在HBaseConfiguration设置可以将扫描限制到部分列，以及限制扫描的时间范围
     //如果outputTable表存在，则删除表；如果不存在则新建表。
 

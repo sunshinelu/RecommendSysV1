@@ -151,6 +151,9 @@ object contentModelV4 {
     val myID = "175786f8-1e74-4d6c-94e9-366cf1649721"
     df5.filter($"userString" === myID).show(false)
     val item = "3d4b6608-01e5-4498-8e31-c1986f9a98af"
+    val item2 = "73a5d629-37fb-4ea9-96bf-34b177832e53"
+    ylzxDS.filter($"itemString" === item2).show(false)
+    ylzxDS.filter($"itemString" === item).show(false)
 */
 
     // 根据userString进行分组，对打分进行倒序排序，获取打分前10的数据。

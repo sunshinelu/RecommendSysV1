@@ -254,12 +254,20 @@ object DailyReadingV3 {
     // join logsDS and ylzxDS
     val df  = logsDS.join(ylzxDS, Seq("itemString"), "left")
 
+    // load stop words
+    val stopwordsFile = "/personal/sunlu/lulu/yeeso/Stopwords.dic"
+    //    val stopwords = sc.textFile(stopwordsFile).collect().toList
+    val stopwords = sc.broadcast(sc.textFile(stopwordsFile).collect().toList)
+
     //定义UDF
-    //关键词提取
+    //分词、词性过滤
     def getKeyWordsFunc(title: String, content: String): String = {
       //每篇文章进行分词
       val segContent = title + content
       val segWords = ToAnalysis.parse(segContent).toString.replace("[","").replace("]","")
+      val seg = ToAnalysis.parse(segContent).toArray.map(_.toString.split("/")).
+        filter(_.length >= 2).filter(x => x(1).contains("n") || x(1).contains("userDefine")).map(_ (0)).toList.
+        filter(word => word.length >= 2 & !stopwords.value.contains(word)).toSeq
 
       val result = segWords match {
         case r if (r.length >= 2) => r

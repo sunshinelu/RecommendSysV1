@@ -144,7 +144,7 @@ object contentModelV4 {
       join(df1_1, Seq("userString", "itemString"), "leftanti").na.drop().
       groupBy("userString", "itemString").agg(sum($"rating")).drop("rating").withColumnRenamed("sum(rating)", "rating")
 
-    val df5 = df4.join(ylzxDS, Seq("itemString"), "left")
+    val df5 = df4.join(ylzxDS, Seq("itemString"), "left").na.drop()
 
     /*
     // test part

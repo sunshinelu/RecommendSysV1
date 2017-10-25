@@ -141,7 +141,7 @@ object contentModelV3 {
       join(df1_1, Seq("userString", "itemString"), "leftanti").na.drop().
       groupBy("userString", "itemString").agg(sum($"rating")).drop("rating").withColumnRenamed("sum(rating)", "rating")
 
-    val df5 = df4.join(ylzxDS, Seq("itemString"), "left")
+    val df5 = df4.join(ylzxDS, Seq("itemString"), "left").na.drop()
 
 
     // 根据userString进行分组，对打分进行倒序排序，获取打分前10的数据。

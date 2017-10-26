@@ -3,32 +3,29 @@ package com.ecloud.Inglory.UserProfile
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date, Properties}
 
-import com.ecloud.Inglory.UserProfile.DailyReadingV2._
-import org.ansj.app.keyword.KeyWordComputer
 import org.ansj.library.UserDefineLibrary
-import org.ansj.recognition.NatureRecognition
 import org.ansj.splitWord.analysis.ToAnalysis
-import org.ansj.util.MyStaticValue
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.protobuf.ProtobufUtil
 import org.apache.hadoop.hbase.util.{Base64, Bytes}
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.storage.StorageLevel
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
-  * Created by sunlu on 17/10/24.
-  *
-  * 由于结果可视化问题，不对结果进行标准化处理
-  * 在计算词权重时，不进行关键词提取，直接使用分词的结果，计算词权重
-  *
-  *
-  */
+ * Created by sunlu on 17/10/24.
+ *
+ * 由于结果可视化问题，不对结果进行标准化处理
+ * 在计算词权重时，不进行关键词提取，直接使用分词的结果，计算词权重
+ *
+ *
+ */
 
 object DailyReadingV3 {
 
@@ -44,9 +41,11 @@ object DailyReadingV3 {
     Logger.getRootLogger().setLevel(Level.OFF)
   }
 
-  case class DailyReadingSchema(SSSJ:String, RMCTJ:String,XZQHTJ:String)//time:String, keywordsList:String,distList:String
+  case class DailyReadingSchema(SSSJ: String, RMCTJ: String, XZQHTJ: String)
 
-  def getNDaysAgo(timeFormat:String,N:Int): String = {
+  //time:String, keywordsList:String,distList:String
+
+  def getNDaysAgo(timeFormat: String, N: Int): String = {
     // 获取时间
     //定义时间格式
     // val dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy hh:mm:ss z", Locale.ENGLISH)
@@ -60,14 +59,15 @@ object DailyReadingV3 {
     val todayL = dateFormat.parse(today).getTime
     //获取N天的时间，并把时间转换成long类型
     val cal: Calendar = Calendar.getInstance()
-    cal.add(Calendar.DATE, -N)//获取N天前或N天后的时间，-2为2天前
+    cal.add(Calendar.DATE, -N) //获取N天前或N天后的时间，-2为2天前
     //        cal.add(Calendar.YEAR, -N) //获取N年或N年后的时间，-2为2年前
     //    cal.add(Calendar.MONTH, -N) //获取N月或N月后的时间，-2为2月前
     val nDaysAgo = dateFormat.format(cal.getTime())
     //    val nDaysAgoL = dateFormat.parse(nDaysAgo).getTime
     nDaysAgo
   }
-  def getNDaysAgoL(timeFormat:String,N:Int): Long = {
+
+  def getNDaysAgoL(timeFormat: String, N: Int): Long = {
     // 获取时间
     //定义时间格式
     // val dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy hh:mm:ss z", Locale.ENGLISH)
@@ -81,7 +81,7 @@ object DailyReadingV3 {
     val todayL = dateFormat.parse(today).getTime
     //获取N天的时间，并把时间转换成long类型
     val cal: Calendar = Calendar.getInstance()
-    cal.add(Calendar.DATE, -N)//获取N天前或N天后的时间，-2为2天前
+    cal.add(Calendar.DATE, -N) //获取N天前或N天后的时间，-2为2天前
     //        cal.add(Calendar.YEAR, -N) //获取N年或N年后的时间，-2为2年前
     //    cal.add(Calendar.MONTH, -N) //获取N月或N月后的时间，-2为2月前
     val nDaysAgo = dateFormat.format(cal.getTime())
@@ -97,8 +97,7 @@ object DailyReadingV3 {
   def getDailyLogsRDD(logsTable: String, sc: SparkContext): RDD[LogView2] = {
 
     // 获取时间
-    val nDaysAgoL = getNDaysAgoL("yyyy-MM-dd",1)
-
+    val nDaysAgoL = getNDaysAgoL("yyyy-MM-dd", 1)
 
     val conf = HBaseConfiguration.create() //在HBaseConfiguration设置可以将扫描限制到部分列，以及限制扫描的时间范围
     //设置查询的表名
@@ -161,10 +160,8 @@ object DailyReadingV3 {
           case r if (r.contains("delFavorite.do")) => -1.0 * value //-0.5
           case _ => 0.0 * value
         }
-
         LogView2(userID, urlString, time, rating)
       }).filter(_.itemString.length >= 5).filter(_.userString.length >= 5)
-
     hbaseRDD
   }
 
@@ -233,14 +230,9 @@ object DailyReadingV3 {
     */
 
     // 加载词典
-    /*
-    val userDefineFile= "/personal/sunlu/ylzx/userDefine.dic"
-    val userDefineList = sc.textFile(userDefineFile).collect().toList
-    userDefineList.foreach(x => {
-      UserDefineLibrary.insertWord(x, "userDefine", 1000)
-    })
-    */
-    MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171024.txt"// bigdata7路径
+    val userDefineFile = "/personal/sunlu/ylzx/userDefine.dic"
+    val userDefineList = sc.broadcast(sc.textFile(userDefineFile).collect().toList)
+    //    MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171024.txt"// bigdata7路径
 
     // 获取日志数据
     val logsRDD = getDailyLogsRDD(logsTable, sc)
@@ -252,7 +244,7 @@ object DailyReadingV3 {
     val ylzxDS = spark.createDataset(ylzxRDD)
 
     // join logsDS and ylzxDS
-    val df  = logsDS.join(ylzxDS, Seq("itemString"), "left")
+    val df = logsDS.join(ylzxDS, Seq("itemString"), "left")
 
     // load stop words
     val stopwordsFile = "/personal/sunlu/lulu/yeeso/Stopwords.dic"
@@ -262,12 +254,17 @@ object DailyReadingV3 {
     //定义UDF
     //分词、词性过滤
     def getKeyWordsFunc(title: String, content: String): String = {
+
+      //加载词典
+      userDefineList.value.foreach(x => {
+        UserDefineLibrary.insertWord(x, "userDefine", 1000)
+      })
       //每篇文章进行分词
       val segContent = title + content
-      val segWords = ToAnalysis.parse(segContent).toString.replace("[","").replace("]","")
-      val seg = ToAnalysis.parse(segContent).toArray.map(_.toString.split("/")).
-        filter(_.length >= 2).filter(x => x(1).contains("n") || x(1).contains("userDefine")).map(_ (0)).toList.
-        filter(word => word.length >= 2 & !stopwords.value.contains(word)).toSeq
+      val segWords = ToAnalysis.parse(segContent).toArray.map(_.toString.split("/")).
+        filter(_.length >= 2).filter(x => x(1).contains("n") || x(1).contains("userDefine")).// || x(1).contains("m")).
+        map(_ (0)).toList.
+        filter(word => word.length >= 2 & !stopwords.value.contains(word)).mkString(" ")
 
       val result = segWords match {
         case r if (r.length >= 2) => r
@@ -282,84 +279,75 @@ object DailyReadingV3 {
       drop("content").drop("title").
       filter($"getKW" =!= "NULL")
 
+    //    df1.printSchema()
+    //    df1.show(5,false)
+
+//    val w2 = Window.partitionBy($"dist").orderBy($"v".desc)
+    val distDF = df.groupBy("dist").agg(sum($"value")).withColumnRenamed("sum(value)", "v")//.withColumn("rn", row_number.over(w2)).filter($"rn" <= 20).drop("rn")
+    val distString = distDF.select("dist", "v").na.drop.orderBy($"v".desc).take(20).
+        map { case Row(dist: String, weight: Double) => (dist + ":" + weight.toString) }.mkString(";")
+
     //split $"getKW" using explode and split functions
-    val df2 = df1.withColumn("KwW",explode(split($"getKW", ",")))
+    val df2 = df1.drop("dist").withColumn("words", explode(split($"getKW", " ")))
 
-    // get keywords and it's weight
-    val df3 = df2.withColumn("words_temp", split($"KwW", "/")(0)).
-      withColumn("words", regexp_replace($"words_temp", " ", "")).drop("words_temp").
-      withColumn("weight",split($"KwW", "/")(1)).
-      drop("getKW").drop("KwW").
-      withColumn("weight", col("weight").cast("double"))
-
-    // reorder $"weight"
-    val w = Window.partitionBy($"itemString").orderBy($"weight".asc)
-    val df4 = df3.withColumn("rn", row_number.over(w)).drop("weight")
-
-    // get rating
-    val df5 = df4.withColumn("rating", $"rn" * $"value").drop("rn")
-
-
-    //获取词性
-    def getNaturesFunc(content: String): String = {
-      val terms = ToAnalysis.parse(content)
-      new NatureRecognition(terms).recognition()
-      val natures = terms.toString.replace("[", "").replace("]", "").split("/")(1)//.mkString("")
-      val result = natures match {
-        case r if (! r.contains(",")) => r
-        case _ => "n"
-      }
-      result
-    }
-    val NaturesUDF = udf((content: String) => getNaturesFunc(content))
-    val ColumnsName = Seq("words","words2")
-    val countryDF = spark.read.option("header", true).option("delimiter", ",").
-      csv("/personal/sunlu/ylzx/country.csv").toDF(ColumnsName:_*)
-
-    val keywordsDF_temp = df5.select("words", "rating")
-
-
-    def exchangeFunc(arg1:String,arg2:String):String = {
+    def exchangeFunc(arg1: String, arg2: String): String = {
       val result = arg2 match {
-        case r if r!= null => arg2
+        case r if r != null => arg2
         case _ => arg1
       }
       result
     }
-    val exchangeUDF = udf((arg1:String,arg2:String) => exchangeFunc(arg1,arg2))
-    val keywordsDF_temp2 = keywordsDF_temp.join(countryDF, Seq("words"), "left").
-      withColumn("words", exchangeUDF($"words", $"words2")).drop("words2")
+
+    // exchange country name
+    val ColumnsName = Seq("words", "words2")
+    val countryDF = spark.read.option("header", true).option("delimiter", ",").
+      csv("/personal/sunlu/ylzx/country.csv").toDF(ColumnsName: _*)
+
+    val exchangeUDF = udf((arg1: String, arg2: String) => exchangeFunc(arg1, arg2))
+    val df3 = df2.join(countryDF, Seq("words"), "left").
+      withColumn("words", exchangeUDF($"words", $"words2")).drop("words2").drop("getKW")
+
+    df3.persist(StorageLevel.MEMORY_AND_DISK_SER)
+    //    df3.printSchema()
+
+    /*
+    calculate tf-idf
+     */
+    //    val wordsTotal = df3.groupBy("words").agg(sum("tag"))// 每个词的总词频
+    val wordsInDocTotal = df3.withColumn("tag1", lit(1.0)).groupBy("itemString", "words").
+      agg(sum("tag1")).withColumnRenamed("sum(tag1)", "w") //每篇文章、每个词的词频
+    val docsTotal = df3.withColumn("tag2", lit(1.0)).groupBy("itemString").agg(sum("tag2")).withColumnRenamed("sum(tag2)", "sum_w") //每篇文章词的总数
+    val docTotal = df3.select("itemString").distinct().count // 文章数据量
+    val wordToDoc = wordsInDocTotal.
+        withColumn("tag3", lit(1.0)).groupBy("words").agg(sum("tag3")).withColumnRenamed("sum(tag3)", "doc") // 词对应的文章数据
 
 
-    val w1 = Window.partitionBy($"words").orderBy($"v".desc)
-    val keywordsDF = keywordsDF_temp2.groupBy("words").agg(sum($"rating")).
-      withColumnRenamed("sum(rating)", "v").withColumn("nature", NaturesUDF($"words")).
-      filter($"nature".contains("n") || $"nature".contains("userDefine") ).
-      withColumn("rn", row_number.over(w1)).filter($"rn" <= 50).drop("rn")
+    val df4 = df3.withColumn("total", lit(docTotal))
+    val df5 = wordsInDocTotal.join(df4, Seq("itemString", "words"), "left").
+      join(docsTotal, Seq("itemString"), "left").
+      join(wordToDoc, Seq("words"), "left").na.drop()
+    val df6 = df5.withColumn("tf", $"w" / $"sum_w").
+      withColumn("idf", log($"total" / $"doc")).withColumn("tf_idf", bround($"tf" * $"idf", 3))
+//    df6.printSchema()
+    val df7 = df6.select("words", "tf_idf", "value").
+      withColumn("rating", bround($"tf_idf" * $"value",3)).
+      groupBy("words").agg(sum("rating")).withColumn("v", bround($"sum(rating)",3))//.withColumnRenamed("sum(rating)", "v")
 
-    val w2 = Window.partitionBy($"dist").orderBy($"v".desc)
-    val distDF = df5.groupBy("dist").agg(sum($"value")).withColumnRenamed("sum(value)", "v").
-      withColumn("rn", row_number.over(w2)).filter($"rn" <= 20).drop("rn")
+    //    df7.show(5,false)
 
+//    val w1 = Window.partitionBy($"words").orderBy($"v".desc)
+//    val keywordsDF = df7.withColumn("rn", row_number.over(w1)).filter($"rn" <= 50).drop("rn")
 
-    val keyworsString = keywordsDF.select("words","vScaled").na.drop.rdd.map{case Row(word:String,weight:Double) => (word, weight)}.map(x =>
-    {
-      val result = x._1 + ":" + x._2.toString
-      (result)
-    }).collect().mkString(";")
+    val keywordsString = df7.select("words", "v").na.drop.orderBy($"v".desc).take(100).
+      map { case Row(word: String, weight: Double) => (word + ":" + weight.toString) }.mkString(";")
 
-    val distString = distDF.select("dist","vScaled").na.drop.rdd.map{case Row(dist:String,weight:Double) => (dist, weight)}.map(x =>
-    {
-      val result = x._1 + ":" + x._2.toString
-      (result)
-    }).collect().mkString(";")
+//    df7.filter($"words".contains("十九大")).show(false)
+//    df7.select("words", "v").na.drop.orderBy($"v".desc).take(100).foreach(println)
 
     val yesterday = getNDaysAgo("yyyy-MM-dd", 1)
 
-    val resultDF = spark.createDataset(sc.parallelize(Seq(DailyReadingSchema(yesterday,keyworsString,distString)))).
+    val resultDF = spark.createDataset(sc.parallelize(Seq(DailyReadingSchema(yesterday, keywordsString, distString)))).
       withColumn("CJSJ", current_timestamp()).withColumn("CJSJ", date_format($"CJSJ", "yyyy-MM-dd HH:mm:ss"))
-
-
 
     //将joinedDf保存到result表中
     val resultTable = "YLZX_TJ_MT_YHXW"
@@ -369,7 +357,6 @@ object DailyReadingV3 {
     prop2.setProperty("user", "ylzx")
     prop2.setProperty("password", "ylzx")
     resultDF.write.mode("append").jdbc(url2, resultTable, prop2)
-
 
     sc.stop()
     spark.stop()

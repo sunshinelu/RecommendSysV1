@@ -156,11 +156,9 @@ object DocsimiTitleV4 {
      */
 
     // 加载词典
-    val userDefineFile= "/personal/sunlu/ylzx/userDefine.dic"
-    val userDefineList = sc.textFile(userDefineFile).collect().toList
-    userDefineList.foreach(x => {
-      UserDefineLibrary.insertWord(x, "userDefine", 1000)
-    })
+    val userDefineFile = "/personal/sunlu/ylzx/userDefine.dic"
+    val userDefineList = sc.broadcast(sc.textFile(userDefineFile).collect().toList)
+
     MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171024.txt"// bigdata7路径
 
     /*
@@ -206,6 +204,11 @@ object DocsimiTitleV4 {
     //定义UDF
     //分词、停用词过滤
     def segWordsFunc(title: String, content: String): Seq[String] = {
+      //加载词典
+      userDefineList.value.foreach(x => {
+        UserDefineLibrary.insertWord(x, "userDefine", 1000)
+      })
+
       //每篇文章提取5个关键词
       val kwc = new KeyWordComputer(5)
       val keywords = kwc.computeArticleTfidf(title, content).toArray.map(_.toString.split("/")).

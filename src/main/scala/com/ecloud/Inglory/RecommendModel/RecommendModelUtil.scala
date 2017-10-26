@@ -179,7 +179,8 @@ object RecommendModelUtil {
         val value = x.value
 
         val rating = time match {
-          case x if (x >= UtilTool.get3Dasys()) => 0.9 * value
+          case x if (x >= UtilTool.getYesterday()) => 1.0 * value
+          case x if (x >= UtilTool.get3Dasys() && x < UtilTool.getYesterday()) => 0.9 * value
           case x if (x >= UtilTool.get7Dasys() && x < UtilTool.get3Dasys()) => 0.8 * value
           case x if (x >= UtilTool.getHalfMonth() && x < UtilTool.get7Dasys()) => 0.7 * value
           case x if (x >= UtilTool.getOneMonth() && x < UtilTool.getHalfMonth()) => 0.6 * value

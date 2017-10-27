@@ -146,7 +146,7 @@ object contentModelV3 {
 
     // 根据userString进行分组，对打分进行倒序排序，获取打分前10的数据。
     val w = Window.partitionBy("userString").orderBy(col("rating").desc)
-    val df6 = df5.withColumn("rn", row_number.over(w)).where($"rn" <= 5)//70
+    val df6 = df5.withColumn("rn", row_number.over(w)).where($"rn" <= 70)//70
 
     val df7 = df6.select("userString", "itemString", "rating", "rn", "title", "manuallabel", "time")
 

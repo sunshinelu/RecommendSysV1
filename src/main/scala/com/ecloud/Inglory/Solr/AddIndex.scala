@@ -166,7 +166,8 @@ object AddIndex {
         val rating: String = new String(result.getValue("info".getBytes, "rating".getBytes), "utf-8")
         val title: String = new String(result.getValue("info".getBytes, "title".getBytes), "utf-8")
         val userID: String = new String(result.getValue("info".getBytes, "userID".getBytes), "utf-8")
-        val rn: String = new String(result.getValue("info".getBytes, "rn".getBytes), "utf-8")
+//        val rn: String = new String(result.getValue("info".getBytes, "rn".getBytes), "utf-8")
+        val rn: Int = new String(result.getValue("info".getBytes, "rn".getBytes)).toInt
         if (title != null && title.length > 0) {
           i += 1
           document.addField("id", rowKey)

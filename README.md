@@ -1057,3 +1057,18 @@ count 't_hbaseSink'
 
 => 4202899
 => 4203007
+
+时间：2017年10月27
+
+任务莫名被清空，重新提交ylzx_logsToHbase任务。
+
+[root@slave4 shScript]# nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase.out 2>&1 &
+[1] 28899
+
+application_1509067561924_0001	
+
+count 't_hbaseSink'
+
+=> 4254739
+
+=> 4254811

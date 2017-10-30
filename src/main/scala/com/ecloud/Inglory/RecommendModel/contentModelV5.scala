@@ -13,6 +13,8 @@ import org.apache.hadoop.hbase.util.{Base64, Bytes}
 import org.apache.hadoop.hbase.{HBaseConfiguration, HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.hadoop.io.Text
 import org.apache.log4j.{Level, Logger}
+import org.apache.spark.ml.feature.MinMaxScaler
+import org.apache.spark.ml.linalg.{DenseVector, Vectors}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.expressions.Window
@@ -20,13 +22,11 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
- * Created by sunlu on 17/10/24.
- * contentModelV3与contentModelV4的区别在于：
- * 使用info:simsScore列作为权重，代替info:level列。
- * 修改原因：防止相似性较低的文章具有较高的权重。
- *
+ * Created by sunlu on 17/10/30.
+ * contentModelV4与contentModelV5的区别在于：
+ * contentModelV5使用1.0 ／ (log(t - prev_t) ＋ 1)计算衰减因子，并对rating结果进行标准化处理
  */
-object contentModelV4 {
+object contentModelV5 {
   def SetLogger = {
     Logger.getLogger("org").setLevel(Level.OFF)
     Logger.getLogger("com").setLevel(Level.OFF)
@@ -94,7 +94,7 @@ object contentModelV4 {
   def main(args: Array[String]) {
     SetLogger
 
-    val sparkConf = new SparkConf().setAppName(s"ylzx_cnxh: contentModelV4") //.setMaster("local[*]").set("spark.executor.memory", "2g")
+    val sparkConf = new SparkConf().setAppName(s"ylzx_cnxh: contentModelV5") //.setMaster("local[*]").set("spark.executor.memory", "2g")
     val spark = SparkSession.builder().config(sparkConf).getOrCreate()
     val sc = spark.sparkContext
     import spark.implicits._
@@ -121,15 +121,29 @@ object contentModelV4 {
     val ylzxRDD = RecommendModelUtil.getYlzxRDD(ylzxTable, sc)
     val ylzxDS = spark.createDataset(ylzxRDD).dropDuplicates("content").drop("content").dropDuplicates()
 
-    val logsRDD = RecommendModelUtil.getLogsRDD(logsTable, sc)
+    val logsRDD = RecommendModelUtil.getLogsRDDV2(logsTable, sc)
     val logsDS = spark.createDataset(logsRDD).na.drop(Array("userString"))
 
-    val df1 = logsDS.select("userString", "itemString", "value")
-    val df1_1 = logsDS.select("userString", "itemString")
+    // 对logsDS中的value列进行标准化处理
+    val vectorizeCol = udf((v: Double) => Vectors.dense(Array(v)))
+    val logsDS_vec = logsDS.withColumn("vVec", vectorizeCol(col("value")))
+    val logsDS_scaler = new MinMaxScaler()
+      .setInputCol("vVec")
+      .setOutputCol("vScaled")
+      .setMax(1)
+      .setMin(0)
+
+    val logsDS_norm = logsDS_scaler.fit(logsDS_vec).transform(logsDS_vec)
+    val reversVectorizeCol = udf { (v: DenseVector) => v(0).toString.toDouble }
+    val logsDS_norm2 = logsDS_norm.drop("value").drop("vVec").
+      withColumn("vScaled2", reversVectorizeCol(col("vScaled")))
+
+    val df1 = logsDS_norm2.select("userString", "itemString", "vScaled2").withColumnRenamed("vScaled2", "value")
+    val df1_1 = logsDS_norm2.select("userString", "itemString")
 
 
     val docsimiRDD = getDocsimiData(docsimiTable, sc)
-    val docsimiDS = spark.createDataset(docsimiRDD).filter($"simsScore" >= 0.2)//.drop("simsScore")
+    val docsimiDS = spark.createDataset(docsimiRDD).filter($"simsScore" >= 0.2) //.drop("simsScore")
 
     //使用info:simsScore列作为权重，代替info:level列。
     val df2 = docsimiDS.select("id", "simsID", "simsScore").withColumn("score", bround(($"simsScore" * (-1) + 1) * 5, 3)).
@@ -146,15 +160,6 @@ object contentModelV4 {
 
     val df5 = df4.join(ylzxDS, Seq("itemString"), "left").na.drop()
 
-    /*
-    // test part
-    val myID = "175786f8-1e74-4d6c-94e9-366cf1649721"
-    df5.filter($"userString" === myID).show(false)
-    val item = "3d4b6608-01e5-4498-8e31-c1986f9a98af"
-    val item2 = "73a5d629-37fb-4ea9-96bf-34b177832e53"
-    ylzxDS.filter($"itemString" === item2).show(false)
-    ylzxDS.filter($"itemString" === item).show(false)
-*/
 
     // 根据userString进行分组，对打分进行倒序排序，获取打分前10的数据。
     val w = Window.partitionBy("userString").orderBy(col("rating").desc)
@@ -162,10 +167,6 @@ object contentModelV4 {
 
     val df7 = df6.select("userString", "itemString", "rating", "rn", "title", "manuallabel", "time")
 
-    /*
-    // test part
-    df7.filter($"userString" === myID).show(false)
-*/
     val conf = HBaseConfiguration.create() //在HBaseConfiguration设置可以将扫描限制到部分列，以及限制扫描的时间范围
     //如果outputTable表存在，则删除表；如果不存在则新建表。
 

@@ -3,6 +3,7 @@ package com.ecloud.Inglory.RecommendModel
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
 
+import breeze.numerics._
 import com.ecloud.Inglory.RatingSys.UtilTool
 import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.Scan
@@ -192,6 +193,111 @@ object RecommendModelUtil {
 
         //val rating = rValue(time, value)
         LogView2(userString, itemString, time, rating)
+      })
+
+    hbaseRDD
+  }
+
+  /*
+  getLogsRDDV2
+  修改计算衰减因子的方法
+计算时间衰减因子：
+1.0 ／ (log(t - prev_t) ＋ 1)
+
+t: tomorrow time
+prev_t: privious time
+
+
+   */
+  def getLogsRDDV2(logsTable: String, sc: SparkContext): RDD[LogView2] = {
+
+    val conf = HBaseConfiguration.create() //在HBaseConfiguration设置可以将扫描限制到部分列，以及限制扫描的时间范围
+    //设置查询的表名
+    conf.set(TableInputFormat.INPUT_TABLE, logsTable) //设置输入表名 第一个参数yeeso-test-ywk_webpage
+
+    //扫描整个表中指定的列和列簇
+    val scan = new Scan()
+    scan.addColumn(Bytes.toBytes("info"), Bytes.toBytes("cREATE_BY_ID")) //cREATE_BY_ID
+    scan.addColumn(Bytes.toBytes("info"), Bytes.toBytes("cREATE_TIME")) //cREATE_TIME
+    scan.addColumn(Bytes.toBytes("info"), Bytes.toBytes("rEQUEST_URI")) //rEQUEST_URI
+    scan.addColumn(Bytes.toBytes("info"), Bytes.toBytes("pARAMS")) //pARAMS
+    conf.set(TableInputFormat.SCAN, convertScanToString(scan))
+
+    val hBaseRDD = sc.newAPIHadoopRDD(conf, classOf[TableInputFormat],
+      classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable],
+      classOf[org.apache.hadoop.hbase.client.Result])
+    //提取hbase数据，并对数据进行过滤
+    val hbaseRDD = hBaseRDD.map { case (k, v) => {
+      val rowkey = k.get()
+      val userID = v.getValue(Bytes.toBytes("info"), Bytes.toBytes("cREATE_BY_ID")) //cREATE_BY_ID
+      val creatTime = v.getValue(Bytes.toBytes("info"), Bytes.toBytes("cREATE_TIME")) //cREATE_TIME
+      val requestURL = v.getValue(Bytes.toBytes("info"), Bytes.toBytes("rEQUEST_URI")) //rEQUEST_URI
+      val parmas = v.getValue(Bytes.toBytes("info"), Bytes.toBytes("pARAMS")) //pARAMS
+      (userID, creatTime, requestURL, parmas)
+    }
+    }.filter(x => null != x._1 & null != x._2 & null != x._3 & null != x._4).
+      map { x => {
+        val userID = Bytes.toString(x._1)
+        val creatTime = Bytes.toString(x._2)
+        //定义时间格式
+        val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") // yyyy-MM-dd HH:mm:ss或者 yyyy-MM-dd
+//        val dateFormat2 = new SimpleDateFormat("yyyy-MM-dd") // yyyy-MM-dd HH:mm:ss或者 yyyy-MM-dd
+//        val creatTimeD = dateFormat.parse(creatTime)
+//        val creatTimeS = dateFormat.format(creatTimeD)
+        val creatTimeL = dateFormat.parse(creatTime).getTime
+
+        val requestURL = Bytes.toString(x._3)
+        val parmas = Bytes.toString(x._4)
+        LogView(userID, creatTimeL, requestURL, parmas)
+      }
+      }.filter(x => x.REQUEST_URI.contains("getContentById.do") || x.REQUEST_URI.contains("like/add.do") ||
+      x.REQUEST_URI.contains("favorite/add.do") || x.REQUEST_URI.contains("favorite/delete.do") ||
+      x.REQUEST_URI.contains("addFavorite.do") || x.REQUEST_URI.contains("delFavorite.do")
+    ).
+      filter(_.PARAMS.toString.length >= 10).
+      map(x => {
+        val userID = x.CREATE_BY_ID.toString
+        //        val reg2 = """id=(\w+\.){2}\w+.*,""".r
+        val reg2 =
+          """id=\S*,|id=\S*}""".r
+        val urlString = reg2.findFirstIn(x.PARAMS.toString).toString.replace("Some(id=", "").replace(",)", "").replace("})", "")
+        val time = x.CREATE_TIME
+        val value = 1.0
+        val rating = x.REQUEST_URI match {
+          case r if (r.contains("getContentById.do")) => 0.2 * value
+          case r if (r.contains("like/add.do")) => 0.3 * value
+          case r if (r.contains("favorite/add.do")) => 0.5 * value
+          case r if (r.contains("addFavorite.do")) => 0.5 * value //0.5
+          case r if (r.contains("favorite/delete.do")) => -0.5 * value
+          case r if (r.contains("delFavorite.do")) => -0.5 * value //-0.5
+          case _ => 0.0 * value
+        }
+
+        LogView2(userID, urlString, time, rating)
+      }).filter(_.itemString.length >= 5).filter(_.userString.length >= 5).
+      map(x => {
+        val userString = x.userString
+        val itemString = x.itemString
+        val time = x.CREATE_TIME
+        val value = x.value
+
+        val rating = time match {
+          case x if (x >= UtilTool.getYesterday()) => 1.0 * value
+          case x if (x >= UtilTool.get3Dasys() && x < UtilTool.getYesterday()) => 0.9 * value
+          case x if (x >= UtilTool.get7Dasys() && x < UtilTool.get3Dasys()) => 0.8 * value
+          case x if (x >= UtilTool.getHalfMonth() && x < UtilTool.get7Dasys()) => 0.7 * value
+          case x if (x >= UtilTool.getOneMonth() && x < UtilTool.getHalfMonth()) => 0.6 * value
+          case x if (x >= UtilTool.getSixMonth() && x < UtilTool.getOneMonth()) => 0.5 * value
+          case x if (x >= UtilTool.getOneYear() && x < UtilTool.getSixMonth()) => 0.4 * value
+          case x if (x < UtilTool.getOneYear()) => 0.3 * value
+          case _ => 0.0
+        }
+
+        val tomorrow = UtilTool.getTomorrow()
+        val rating2  = 1.0 / (log(((tomorrow - time).toDouble / (1000 * 60 * 60 * 24))) + 1)
+
+        //val rating = rValue(time, value)
+        LogView2(userString, itemString, time, rating2)
       })
 
     hbaseRDD

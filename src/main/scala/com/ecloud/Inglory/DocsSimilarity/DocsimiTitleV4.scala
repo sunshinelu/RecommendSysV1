@@ -257,7 +257,7 @@ object DocsimiTitleV4 {
     // Feature Transformation
     val mhTransformed = mhModel.transform(tfidfData)
     val mhTransformedOneMonth = mhTransformed.filter($"timeL" >= oneMonthAgoL)
-    val docsimi_mh = mhModel.approxSimilarityJoin(mhTransformedOneMonth, mhTransformed, 0.9)//1.0
+    val docsimi_mh = mhModel.approxSimilarityJoin(mhTransformedOneMonth, mhTransformed, 0.85)//1.0
     //  case class YlzxSchema(itemString: String, title: String, manuallabel: String, time: String,timeL:Long, websitename: String, content: String)
 
     val colRenamed = Seq("doc1", "doc2", "doc2_title", "doc2_label", "doc2_websitename", "doc2_time", "distCol")

@@ -29,6 +29,15 @@ object UtilTool extends Serializable{
   val sixMonth = tool.getSixMonth()
   val oneYear = tool.getOneYear()
    */
+  //获取明天日期
+  def getTomorrow(): Long = {
+    var dateFormat: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+    var cal: Calendar = Calendar.getInstance()
+    cal.add(Calendar.DATE, 1)
+    var tomorrow = dateFormat.format(cal.getTime())
+    val tomorrowL = dateFormat.parse(tomorrow).getTime
+    tomorrowL
+  }
 
   //获取今天日期
   def getNowDate(): Long = {

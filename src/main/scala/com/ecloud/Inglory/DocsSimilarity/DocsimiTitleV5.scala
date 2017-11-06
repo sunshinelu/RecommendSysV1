@@ -164,7 +164,7 @@ object DocsimiTitleV5 {
     MyStaticValue.userLibrary = "/root/lulu/Progect/NLP/userDic_20171024.txt"// bigdata7路径
 
     /*
-2. 获取7天前的时间
+2. 获取N天前的时间
  */
 
     //定义时间格式

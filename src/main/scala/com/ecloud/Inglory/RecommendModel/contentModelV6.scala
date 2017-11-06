@@ -22,11 +22,11 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
- * Created by sunlu on 17/10/30.
- * contentModelV4与contentModelV5的区别在于：
- * contentModelV5使用1.0 ／ (log(t - prev_t) ＋ 1)计算衰减因子，并对rating结果进行标准化处理
+ * Created by sunlu on 17/11/6.
+ * contentModelV5与contentModelV6的区别在于：
+ * contentModelV6中关于对simsScore的处理进行了修正
  */
-object contentModelV5 {
+object contentModelV6 {
   def SetLogger = {
     Logger.getLogger("org").setLevel(Level.OFF)
     Logger.getLogger("com").setLevel(Level.OFF)
@@ -79,13 +79,14 @@ object contentModelV5 {
         val id = Bytes.toString(x._1)
         val simsID = Bytes.toString(x._2)
         val simsScore = Bytes.toString(x._3).toDouble
+        val simsScore2 = (-1 * simsScore) + 1.0
         val level = Bytes.toString(x._4)
         val level2 = (-0.1 * level.toInt) + 1
         val title = Bytes.toString(x._5)
         val manuallabel = Bytes.toString(x._6)
         val mod = Bytes.toString(x._7)
         val websitename = Bytes.toString(x._8)
-        DocsimiSchema(id, simsID, simsScore, level2, title, manuallabel, mod, websitename)
+        DocsimiSchema(id, simsID, simsScore2, level2, title, manuallabel, mod, websitename)
       })
     hbaseRDD
   }
@@ -143,7 +144,7 @@ object contentModelV5 {
 
 
     val docsimiRDD = getDocsimiData(docsimiTable, sc)
-    val docsimiDS = spark.createDataset(docsimiRDD)//.filter($"simsScore" >= 0.2) //.drop("simsScore")
+    val docsimiDS = spark.createDataset(docsimiRDD).filter($"simsScore" >= 0.2) //.drop("simsScore")
 
     //使用info:simsScore列作为权重，代替info:level列。
     val df2 = docsimiDS.select("id", "simsID", "simsScore").withColumn("score", bround(($"simsScore" * (-1) + 1) * 5, 3)).

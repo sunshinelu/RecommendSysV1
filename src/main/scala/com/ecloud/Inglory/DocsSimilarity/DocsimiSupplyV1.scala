@@ -25,6 +25,24 @@ import org.apache.spark.{SparkConf, SparkContext}
  *
  * 计算相似性文章数小于3的文章的相似文章。
  * 计算方法，采用DocsimiTitleV5的方法
+ *
+ * 测试代码
+ *
+spark-submit \
+--class com.ecloud.Inglory.DocsSimilarity.DocsimiSupplyV1 \
+--master yarn \
+--deploy-mode client \
+--num-executors 6 \
+--executor-cores 4 \
+--executor-memory 8g \
+--conf spark.default.parallelism=200 \
+--conf spark.storage.memoryFraction=0.5 \
+--conf spark.shuffle.memoryFraction=0.4 \
+/root/lulu/Progect/ylzx/RecommendSysV1-1.0-SNAPSHOT-jar-with-dependencies.jar \
+yilan-total-analysis_webpage ylzx_xgwz ylzx_xgwz_temp 1
+ *
+ * 运行时间：
+ *
  */
 object DocsimiSupplyV1 {
   def convertScanToString(scan: Scan) = {

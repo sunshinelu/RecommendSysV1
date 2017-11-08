@@ -28,6 +28,10 @@ import org.apache.spark.{SparkConf, SparkContext}
  *
  * 测试代码
  *
+spark-shell --master yarn --num-executors 4 --executor-cores 4 --executor-memory 8g --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar
+ *
+ *
+ *
 spark-submit \
 --class com.ecloud.Inglory.DocsSimilarity.DocsimiSupplyV1 \
 --master yarn \
@@ -86,6 +90,8 @@ object DocsimiSupplyV1 {
       }).filter(_.simScore >= 0.2)
     hbaseRDD
   }
+
+
   def DeleteAndSaveTable(tableName: String, resultDF: DataFrame): Unit = {
     val hbaseConf = HBaseConfiguration.create()
 
@@ -198,6 +204,7 @@ object DocsimiSupplyV1 {
     val ylzxTable = "yilan-total-analysis_webpage"
     val docSimiTable = "ylzx_xgwz"
     val tempDocSimiTable = "ylzx_xgwz_temp"
+    val year = 1.toInt
      */
 
     // 加载词典
@@ -266,13 +273,13 @@ object DocsimiSupplyV1 {
     val idf = new IDF().
       setInputCol("rawFeatures").
       setOutputCol("features")
-    val idfModel = idf.fit(featurizedData)
+    val idfModel = idf.fit(featurizedData)//此处会触发action
 
     val tfidfData = idfModel.transform(featurizedData)
 
     /*
 6. using Jaccard Distance calculate doc-doc similarity
-计算近一月的文章与近一年的文章之间的相似性
+计算没有相似文章的文章与近一年的文章之间的相似性
     */
     val mh = new MinHashLSH().
       setNumHashTables(3).
@@ -283,6 +290,16 @@ object DocsimiSupplyV1 {
     // Feature Transformation
     val mhTransformed = mhModel.transform(tfidfData)
     val mhTransformedSupply = mhTransformed.join(docSimiFilter, Seq("itemString"), "leftanti")
+    /*
+    mhTransformed.count
+res7: Long = 187195
+
+docSimiFilter.count
+res8: Long = 144827
+
+mhTransformedSupply.count
+res9: Long = 65266
+     */
     val docsimi_mh = mhModel.approxSimilarityJoin(mhTransformedSupply, mhTransformed, 0.85) //1.0
 
     val colRenamed = Seq("doc1", "doc2", "doc2_title", "doc2_label", "doc2_websitename", "doc2_time", "distCol")

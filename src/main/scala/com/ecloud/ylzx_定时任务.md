@@ -60,6 +60,15 @@ crontab -u root -e
 
 0 3 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_tj_mt_yhxw.sh
 
+
+将bigdata7上的定时任务迁移回到slave6上（时间：2017年11月14日）
+
+0 8 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_xgwz.sh
+
+0 22 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_cnxh.sh
+
+0 3 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_tj_mt_yhxw.sh
+
 4.重新启动服务
 service crond restart
 

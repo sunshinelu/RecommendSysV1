@@ -1072,3 +1072,19 @@ count 't_hbaseSink'
 => 4254739
 
 => 4254811
+
+时间：2017年11月16
+
+任务莫名被清空，重新提交ylzx_logsToHbase任务。
+
+[root@slave4 ~]# cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
+[root@slave4 shScript]# nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase.out 2>&1 &
+[1] 11540
+
+application_1510795685747_0002
+
+=> 4314609
+
+=> 4314675
+
+=> 4314805

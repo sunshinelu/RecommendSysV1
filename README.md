@@ -1083,8 +1083,16 @@ count 't_hbaseSink'
 
 application_1510795685747_0002
 
+count 't_hbaseSink'
+
 => 4314609
 
 => 4314675
 
 => 4314805
+
+时间：2017年11月17
+
+count 't_hbaseSink'
+
+=> 4316927

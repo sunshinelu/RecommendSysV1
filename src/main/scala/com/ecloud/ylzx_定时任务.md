@@ -79,6 +79,10 @@ crontab -u root -e
 
 0 3 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_tj_mt_yhxw.sh
 
+在bigdata7上添加定时任务（时间：2017年12月04日）
+
+11 0 * * * /bin/sh /root/lulu/Progect/Test/ylzx_userProfile_retention.sh
+
 4.重新启动服务
 service crond restart
 

@@ -26,7 +26,7 @@ t_hbaseSink
 
 info:logID //LOG_ID 编号
 info:tYPE //TYPE 1：接入日志；2：错误日志'
-info:cREATE_BY //CREATE_BY
+info:cREATE_BY //CREATE_BY 创建者
 info:cREATE_BY_ID //CREATE_BY_ID 登录人ID
 info:cREATE_TIME //CREATE_TIME 创建时间
 info:rEMOTE_ADDR //REMOTE_ADDR 操作IP地址

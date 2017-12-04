@@ -1096,3 +1096,23 @@ count 't_hbaseSink'
 count 't_hbaseSink'
 
 => 4316927
+
+
+时间：2017年11月30
+
+count 't_hbaseSink'
+
+=> 4339284
+
+=> 4339441
+
+时间：2017年12月04
+
+count 't_hbaseSink'
+
+=> 4437017
+
+count 'ylzx_xgwz'
+
+=> 1305490
+

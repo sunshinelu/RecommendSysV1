@@ -34,3 +34,33 @@ info:uSER_AGENT //USER_AGENT 用户代理
 info:rEQUEST_URI //REQUEST_URI 请求URI
 info:mETHOD //METHOD 操作方式
 info:pARAMS//PARAMS 操作提交的数据
+
+iOS系统手机访问记录：
+    rEQUEST_URI：/app/login/v1/updatePushIdByToken.do
+    pARAMS：pushId=
+
+安卓系统手机访问记录：
+    rEQUEST_URI：/app/init/v1.do
+    pARAMS：IMEI=
+
+用户行为：
+    rEQUEST_URI
+        app：
+        addFavorite.do 收藏
+        delFavorite.do 取消收藏
+        addComment.do 评论
+        getContentById.do 浏览
+        web：
+        getContentById.do 浏览
+        favorite/add.do 收藏
+        favorite/delete.do 取消收藏
+        like/add.do 点赞
+            使用以下几种：
+            getContentById.do 浏览
+            favorite/add.do 收藏
+            addFavorite.do 收藏
+            favorite/delete.do 取消收藏
+            delFavorite.do 取消收藏
+            like/add.do 点赞
+            addComment.do 评论(暂时不使用)
+    pARAMS: id=

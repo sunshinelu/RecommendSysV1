@@ -30,7 +30,7 @@ spark-submit \
 --class com.ecloud.swt.ContentRecommV2 \
 --master yarn \
 --num-executors 4 \
---executor-cores  2 \
+--executor-cores  4 \
 --executor-memory 4g \
 --jars /root/software/extraClass/ansj_seg-3.7.6-all-in-one.jar \
 /root/lulu/Progect/ylzx/RecommendSysV1.jar \
@@ -303,7 +303,7 @@ object ContentRecommV2 {
 
     //对dataframe进行分组排序，并取每组的前6个
     val w = Window.partitionBy("userString").orderBy(col("rating").desc)
-    val content_df4 = content_df3.withColumn("rn", row_number.over(w)).where(col("rn") <= 6)
+    val content_df4 = content_df3.withColumn("rn", row_number.over(w)).where(col("rn") <= 15)
 
     val columnsRenamed = Seq("USERNAME", "OPERATOR_ID", "ATICLEID", "TITLE", "ATICLETIME", "CREATETIME", "RATE")
     val content_df5 = content_df4.withColumn("systime", current_timestamp()).

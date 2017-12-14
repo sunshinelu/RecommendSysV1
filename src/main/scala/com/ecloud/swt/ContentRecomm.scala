@@ -276,7 +276,7 @@ object ContentRecomm {
 
     //对dataframe进行分组排序，并取每组的前5个
     val w = Window.partitionBy("userString").orderBy(col("time").desc)
-    val rankDF = joinedDf3.withColumn("rn", row_number.over(w)).where(col("rn") <= 6)
+    val rankDF = joinedDf3.withColumn("rn", row_number.over(w)).where(col("rn") <= 15)
 
     //.select("userString", "operatorId","itemString", "title", "time", "CREATETIME","rn")
     val columnsRenamed = Seq("USERNAME", "OPERATOR_ID", "ATICLEID", "TITLE", "ATICLETIME", "CREATETIME", "RATE")

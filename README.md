@@ -1116,3 +1116,13 @@ count 'ylzx_xgwz'
 
 => 1305490
 
+时间：2018年01月15
+
+count 't_hbaseSink'
+
+=> 4540933
+
+
+count 'ylzx_xgwz'
+
+=> 1592253

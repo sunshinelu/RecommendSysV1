@@ -1126,3 +1126,9 @@ count 't_hbaseSink'
 count 'ylzx_xgwz'
 
 => 1592253
+
+时间：2018年01月22
+
+count 'yilan-total-analysis_webpage'
+
+=> 409036

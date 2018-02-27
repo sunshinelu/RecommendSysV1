@@ -1132,3 +1132,28 @@ count 'ylzx_xgwz'
 count 'yilan-total-analysis_webpage'
 
 => 409036
+
+
+时间：2018年02月10
+
+cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
+nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180210.out 2>&1 &
+
+[root@slave4 ~]# cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
+[root@slave4 shScript]# nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180210.out 2>&1 &
+[1] 24912
+
+count 't_hbaseSink'
+
+=> 4572504
+
+时间：2018年02月27
+
+
+cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
+nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180227.out 2>&1 &
+
+
+[root@slave4 ~]# cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
+[root@slave4 shScript]# nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180227.out 2>&1 &
+[1] 23710

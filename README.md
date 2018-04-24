@@ -1157,3 +1157,20 @@ nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180227.out 2>&1 &
 [root@slave4 ~]# cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
 [root@slave4 shScript]# nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180227.out 2>&1 &
 [1] 23710
+
+时间：2018年04月24
+
+cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
+nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180424.out 2>&1 &
+
+[root@slave4 ~]# cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
+[root@slave4 shScript]# nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180424.out 2>&1 &
+[1] 16811
+
+hbase shell
+
+count 't_hbaseSink'
+
+=> 4656485
+
+=> 4656547

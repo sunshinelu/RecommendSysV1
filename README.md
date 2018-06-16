@@ -1174,3 +1174,27 @@ count 't_hbaseSink'
 => 4656485
 
 => 4656547
+
+
+时间：2018年06月16
+
+链接slave4，输入以下命令：
+
+cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
+nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180616.out 2>&1 &
+
+hbase shell
+
+count 't_hbaseSink'
+
+报错
+ERROR: org.apache.hadoop.hbase.NotServingRegionException: Region t_hbaseSink,8fa72b43-a7ef-4155-876c-4643b1c66302,1510716904164.ca9cf3274c592f051a2b99a67f0fe788. is not online on bigdata2.yiyun,60020,1528941187639
+	at org.apache.hadoop.hbase.regionserver.HRegionServer.getRegionByEncodedName(HRegionServer.java:2774)
+	at org.apache.hadoop.hbase.regionserver.HRegionServer.getRegion(HRegionServer.java:4257)
+	at org.apache.hadoop.hbase.regionserver.HRegionServer.scan(HRegionServer.java:3156)
+	at org.apache.hadoop.hbase.protobuf.generated.ClientProtos$ClientService$2.callBlockingMethod(ClientProtos.java:29994)
+	at org.apache.hadoop.hbase.ipc.RpcServer.call(RpcServer.java:2078)
+	at org.apache.hadoop.hbase.ipc.CallRunner.run(CallRunner.java:108)
+	at org.apache.hadoop.hbase.ipc.RpcExecutor.consumerLoop(RpcExecutor.java:114)
+	at org.apache.hadoop.hbase.ipc.RpcExecutor$1.run(RpcExecutor.java:94)
+	at java.lang.Thread.run(Thread.java:745)

@@ -100,7 +100,9 @@ object logsToHbase {
     })
     //lines.print()
 
-    val tableName = "t_hbaseSink"//creat 't_hbaseSink','info'
+//    val tableName = "t_hbaseSink"//creat 't_hbaseSink','info'
+    // 2018年07月02日名称更改为ylzx_logs_20180702
+    val tableName =  "ylzx_logs_20180702" //create 'ylzx_logs_20180702','info'
 
 
 

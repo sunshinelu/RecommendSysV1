@@ -1198,3 +1198,63 @@ ERROR: org.apache.hadoop.hbase.NotServingRegionException: Region t_hbaseSink,8fa
 	at org.apache.hadoop.hbase.ipc.RpcExecutor.consumerLoop(RpcExecutor.java:114)
 	at org.apache.hadoop.hbase.ipc.RpcExecutor$1.run(RpcExecutor.java:94)
 	at java.lang.Thread.run(Thread.java:745)
+
+时间：2018年07月02日
+
+disable 't_hbaseSink'
+drop 't_hbaseSink' # drop命令失败 
+creat 't_hbaseSink','info'
+
+count 't_hbaseSink'
+
+enable 't_hbaseSink'
+
+
+create 'ylzx_logs_20180702','info'
+count 'ylzx_logs_20180702'
+
+cd lulu/Workspace/spark/yeeso/RecommendSys/shScript/
+nohup ./ylzx_logsToHbase.sh > ylzx_logsToHbase_20180702.out 2>&1 &
+
+
+application_1524475208781_3992	com.ecloud.Inglory.Streaming.logsToHbase	               SPARK	      root   default	           RUNNING	         UNDEFINED	            10%	          http://192.168.37.14:4040
+
+［slave4］
+
+crontab -l
+
+30 6,13,16,19 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_hotLabels.sh
+0 12 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/swt_recom.sh
+0 7 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_appRecom.sh
+20 4 * * * /bin/sh /root/lulu/Workspace/spark/yeeso/RecommendSys/shScript/ylzx_tj_yhxw.sh
+
+vi ylzx_hotLabels.sh
+执行命令修改：将t_hbaseSink改为ylzx_logs_20180702
+
+vi ylzx_appRecom.sh
+执行命令修改：将t_hbaseSink改为ylzx_logs_20180702
+
+vi ylzx_tj_yhxw.sh
+执行命令修改：将t_hbaseSink改为ylzx_logs_20180702
+
+
+［bigdata7］
+crontab -l
+0 8 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_xgwz.sh
+0 22 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_cnxh.sh
+0 3 * * * /bin/sh /root/lulu/Progect/ylzx/ylzx_tj_mt_yhxw.sh
+11 0 * * * /bin/sh /root/lulu/Progect/Test/ylzx_userProfile_retention.sh
+30 1 * * * /bin/sh /root/lulu/Progect/Test/ylzx_userProfile_appDAU.sh
+
+
+vi ylzx_cnxh.sh
+执行命令修改：将t_hbaseSink改为ylzx_logs_20180702
+
+vi ylzx_tj_mt_yhxw.sh
+执行命令修改：将t_hbaseSink改为ylzx_logs_20180702
+
+/root/lulu/Progect/Test/ylzx_userProfile_retention.sh
+在代码中修改，在代码中将t_hbaseSink改为ylzx_logs_20180702
+
+/root/lulu/Progect/Test/ylzx_userProfile_appDAU.sh
+在代码中修改，在代码中将t_hbaseSink改为ylzx_logs_20180702

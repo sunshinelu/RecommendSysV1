@@ -1258,3 +1258,16 @@ vi ylzx_tj_mt_yhxw.sh
 
 /root/lulu/Progect/Test/ylzx_userProfile_appDAU.sh
 在代码中修改，在代码中将t_hbaseSink改为ylzx_logs_20180702
+
+时间：2018年07月03
+
+count 'yilan-total-analysis_webpage'
+
+=> 628275
+
+count 't_hbaseSink'
+=> 4764007
+
+
+count 'ylzx_logs_20180702'
+=> 653

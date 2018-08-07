@@ -5,6 +5,7 @@ import org.apache.spark.sql.SparkSession
 
 /**
  * Created by sunlu on 17/6/16.
+ * 获取dataframe中的第一条数据
  */
 object t6 {
 
